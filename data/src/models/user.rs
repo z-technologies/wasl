@@ -1,4 +1,4 @@
-use crate::models::model::Model;
+use crate::models::Model;
 
 #[derive(Clone, Debug, Model, Queryable)]
 pub struct User {
