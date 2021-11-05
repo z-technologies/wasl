@@ -5,3 +5,14 @@ edition = "2021"
 
 [dependencies]
 data-derive = { path = "data-derive" }
+
+# serialization/deserialization
+serde = { version = "1", features = ["derive"] }
+bson = "2.0.1"
+
+# log
+log = "0.4"
+fast_log="1.3"
+
+# orm
+rbatis =  { version = "3.0" }
