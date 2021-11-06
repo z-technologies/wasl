@@ -1,17 +1,43 @@
 use crate::models::Model;
+use crate::schema::users;
 
-#[derive(Clone, Debug, Model, Queryable)]
+#[derive(Clone, Debug, Model, Queryable, AsChangeset)]
 pub struct User {
-    id: u64,
+    pub id: u64,
 
-    username: String,
-    password_hash: Option<String>,
-    password_salt: Option<String>,
+    pub username: String,
+    pub password_hash: Option<String>,
+    pub password_salt: Option<String>,
 
-    email: String,
-    is_active: bool,
+    pub email: String,
+    pub is_active: bool,
 
-    first_name: String,
-    last_name: String,
-    profile_photo: String,
+    pub first_name: Option<String>,
+    pub last_name: Option<String>,
+    pub profile_photo: Option<String>,
+}
+
+#[derive(Debug, Insertable)]
+#[table_name = "users"]
+pub struct NewUser<'a> {
+    pub username: &'a str,
+    pub email: &'a str,
+    pub first_name: Option<&'a str>,
+    pub last_name: Option<&'a str>,
+}
+
+impl<'a> NewUser<'a> {
+    pub fn new(
+        username: &'a str,
+        email: &'a str,
+        first_name: Option<&'a str>,
+        last_name: Option<&'a str>,
+    ) -> NewUser<'a> {
+        NewUser {
+            username,
+            email,
+            first_name,
+            last_name,
+        }
+    }
 }
