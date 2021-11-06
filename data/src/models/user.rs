@@ -1,6 +1,8 @@
 use crate::models::Model;
 use crate::schema::users;
 
+use serde::{Deserialize, Serialize};
+
 #[derive(Clone, Debug, Model, Queryable, AsChangeset)]
 pub struct User {
     pub id: u64,
@@ -17,7 +19,7 @@ pub struct User {
     pub profile_photo: Option<String>,
 }
 
-#[derive(Debug, Insertable)]
+#[derive(Debug, Insertable, Serialize, Deserialize)]
 #[table_name = "users"]
 pub struct NewUser<'a> {
     pub username: &'a str,
