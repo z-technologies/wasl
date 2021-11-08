@@ -1,9 +1,7 @@
-use crate::models::Model;
 use crate::schema::users;
-
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug, Model, Queryable, AsChangeset)]
+#[derive(Clone, Debug, Identifiable, Queryable, AsChangeset)]
 pub struct User {
     pub id: u64,
 
