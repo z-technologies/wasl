@@ -4,8 +4,6 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-data-derive = { path = "data-derive" }
-
 # diesel orm
 diesel = { version = "1.4.4", features = ["postgres"] }
 
