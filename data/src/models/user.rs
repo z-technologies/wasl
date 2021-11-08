@@ -1,9 +1,11 @@
+use crate::models::KeyType;
 use crate::schema::users;
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Identifiable, Queryable, AsChangeset)]
 pub struct User {
-    pub id: u64,
+    pub id: KeyType,
 
     pub username: String,
     pub password_hash: Option<String>,
@@ -24,20 +26,4 @@ pub struct NewUser<'a> {
     pub email: &'a str,
     pub first_name: Option<&'a str>,
     pub last_name: Option<&'a str>,
-}
-
-impl<'a> NewUser<'a> {
-    pub fn new(
-        username: &'a str,
-        email: &'a str,
-        first_name: Option<&'a str>,
-        last_name: Option<&'a str>,
-    ) -> NewUser<'a> {
-        NewUser {
-            username,
-            email,
-            first_name,
-            last_name,
-        }
-    }
 }
