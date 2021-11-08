@@ -25,6 +25,7 @@ impl<'a> DbContext<'a> {
     }
 }
 
-pub fn create_connection(url: &str) -> result::Result<DbConnection> {
+pub fn create_connection() -> result::Result<DbConnection> {
+    let url = std::env::var("DATABASE_URL")?;
     Ok(DbConnection::establish(&url)?)
 }
