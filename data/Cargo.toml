@@ -5,7 +5,7 @@ edition = "2021"
 
 [dependencies]
 # diesel orm
-diesel = { version = "1.4.4", features = ["postgres"] }
+diesel = { version = "1.4.8", features = ["postgres"] }
 
 # environment variables config
 dotenv = "0.15.0"
