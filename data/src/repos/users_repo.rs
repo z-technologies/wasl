@@ -44,3 +44,9 @@ impl<'db> Repo<User, NewUser<'_>> for UsersRepo<'db> {
         }
     }
 }
+
+impl<'a> UsersRepo<'a> {
+    pub fn new(db: &'a DbConnection) -> UsersRepo<'a> {
+        UsersRepo::<'a> { db }
+    }
+}
