@@ -25,6 +25,6 @@ impl<'a> DbContext<'a> {
     }
 }
 
-fn create_connection(url: &str) -> result::Result<DbConnection> {
+pub fn create_connection(url: &str) -> result::Result<DbConnection> {
     Ok(DbConnection::establish(&url)?)
 }
