@@ -1,5 +1,3 @@
-use diesel;
-
 use std::fmt;
 
 #[derive(Debug)]
@@ -16,5 +14,11 @@ impl fmt::Display for DataError {
             DataError::InternalError(err) => write!(f, "{}", err),
             DataError::NotFound => write!(f, "no such item"),
         }
+    }
+}
+
+impl From<diesel::result::Error> for DataError {
+    fn from(err: diesel::result::Error) -> DataError {
+        DataError::InternalError(err)
     }
 }
