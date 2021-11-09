@@ -6,12 +6,17 @@ use diesel::PgConnection;
 
 pub type DbConnection = PgConnection;
 
-pub trait Repo<T, I> {
-    fn get_all(&self) -> result::Result<Vec<T>>;
-    fn get(&self, id: KeyType) -> result::Result<T>;
+pub trait RepoTypes {
+    type Model;
+    type InsertModel;
+}
 
-    fn insert(&self, item: &I) -> result::Result<T>;
-    fn update<'a>(&self, item: &'a T) -> result::Result<&'a T>;
+pub trait Repo: RepoTypes {
+    fn get_all(&self) -> result::Result<Vec<Self::Model>>;
+    fn get(&self, id: KeyType) -> result::Result<Self::Model>;
 
-    fn delete(&self, item: &T) -> result::Result<()>;
+    fn insert(&self, item: &Self::InsertModel) -> result::Result<Self::Model>;
+    fn update<'a>(&self, item: &'a Self::Model) -> result::Result<&'a Self::Model>;
+
+    fn delete(&self, item: &Self::Model) -> result::Result<()>;
 }
