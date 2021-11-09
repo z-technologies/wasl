@@ -12,7 +12,7 @@ impl<'a> DbContext<'a> {
     pub fn new(db: &'a DbConnection) -> DbContext<'a> {
         DbContext::<'a> {
             db,
-            users: UsersRepo::<'a>::new(db),
+            users: UsersRepo::<'a> { db },
         }
     }
 
