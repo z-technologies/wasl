@@ -4,7 +4,7 @@ use crate::models::group::*;
 use crate::repos::{DbConnection, Repo, RepoTypes};
 use crate::result;
 
-use diesel::{ExpressionMethods, QueryDsl, RunQueryDsl};
+use diesel::prelude::*;
 
 #[derive(data_derive::Repository)]
 pub struct GroupsRepo<'a> {
