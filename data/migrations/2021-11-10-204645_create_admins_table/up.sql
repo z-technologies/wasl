@@ -1,7 +1,7 @@
 CREATE TABLE admins (
     id            SERIAL       PRIMARY KEY,
 
-    username      VARCHAR(32)  NOT NULL,
+    username      VARCHAR(32)  NOT NULL UNIQUE,
     password_hash VARCHAR(64)  NOT NULL,
     password_salt VARCHAR(64)  NOT NULL,
 
