@@ -3,7 +3,8 @@ use std::fmt;
 #[derive(Debug)]
 pub enum BusinessError {
     DataError(data::result::DataError),
-    InvalidUsernameOrPassword,
+    InvalidPassword,
+    NoPasswordIsSet,
 }
 
 pub type Result<T> = std::result::Result<T, BusinessError>;
@@ -17,7 +18,7 @@ impl fmt::Display for BusinessError {
 }
 
 impl From<data::result::DataError> for BusinessError {
-    fn from(err: data::result::DataError) -> DataError {
+    fn from(err: data::result::DataError) -> BusinessError {
         BusinessError::DataError(err)
     }
 }
