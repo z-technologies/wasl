@@ -1,4 +1,12 @@
 table! {
+    admin_groups (id) {
+        id -> Int4,
+        admin_id -> Int4,
+        group_id -> Int4,
+    }
+}
+
+table! {
     admins (id) {
         id -> Int4,
         username -> Varchar,
@@ -31,7 +39,11 @@ table! {
     }
 }
 
+joinable!(admin_groups -> admins (admin_id));
+joinable!(admin_groups -> groups (group_id));
+
 allow_tables_to_appear_in_same_query!(
+    admin_groups,
     admins,
     groups,
     users,
