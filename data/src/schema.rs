@@ -27,6 +27,7 @@ table! {
         first_name -> Nullable<Varchar>,
         last_name -> Nullable<Varchar>,
         profile_photo -> Nullable<Varchar>,
+        is_provider -> Bool,
     }
 }
 

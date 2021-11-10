@@ -17,6 +17,8 @@ pub struct User {
     pub first_name: Option<String>,
     pub last_name: Option<String>,
     pub profile_photo: Option<String>,
+
+    pub is_provider: bool,
 }
 
 #[derive(Debug, Insertable, Serialize, Deserialize)]
@@ -26,4 +28,5 @@ pub struct NewUser<'a> {
     pub email: &'a str,
     pub first_name: Option<&'a str>,
     pub last_name: Option<&'a str>,
+    pub is_provider: Option<bool>,
 }
