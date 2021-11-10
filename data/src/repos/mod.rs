@@ -1,3 +1,4 @@
+pub mod admins_repo;
 pub mod users_repo;
 
 use crate::models::KeyType;
