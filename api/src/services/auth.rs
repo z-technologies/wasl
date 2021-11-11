@@ -1,6 +1,6 @@
 use crate::result::{ApiError, ApiResult};
+use crate::security::password::password_matches;
 
-use business::security::password::password_matches;
 use data::context::DbContext;
 use data::models::user::User;
 
