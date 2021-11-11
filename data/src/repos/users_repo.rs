@@ -18,17 +18,25 @@ impl RepoTypes for UsersRepo {
 }
 
 impl UsersRepo {
-    pub fn get_by_username<'a>(&self, uname: &'a str) -> result::Result<User> {
+    pub fn get_by_username<'a>(
+        &self,
+        uname: &'a str,
+    ) -> result::Result<Option<User>> {
         use crate::schema::users::dsl::*;
         Ok(users
             .filter(username.eq(uname))
-            .first::<User>(&self.get_connection()?)?)
+            .first::<User>(&self.get_connection()?)
+            .optional()?)
     }
 
-    pub fn get_by_email<'a>(&self, em: &'a str) -> result::Result<User> {
+    pub fn get_by_email<'a>(
+        &self,
+        em: &'a str,
+    ) -> result::Result<Option<User>> {
         use crate::schema::users::dsl::*;
         Ok(users
             .filter(email.eq(em))
-            .first::<User>(&self.get_connection()?)?)
+            .first::<User>(&self.get_connection()?)
+            .optional()?)
     }
 }
