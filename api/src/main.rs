@@ -1,5 +1,5 @@
 mod config;
-mod routes;
+mod handlers;
 
 use actix_web::{App, HttpServer};
 
