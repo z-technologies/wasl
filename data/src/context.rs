@@ -36,10 +36,10 @@ impl<'a> DbContext<'a> {
     }
 }
 
-pub fn create_connection_pool(url: &str) -> result::Result<DbPool> {
+pub fn create_connection_pool(url: &str, max_connections: u32) -> result::Result<DbPool> {
     let manager = DbConnectionManager::new(url);
 
-    match DbPool::builder().build(manager) {
+    match DbPool::builder().max_size(max_connections).build(manager) {
         Ok(pool) => Ok(pool),
         Err(err) => Err(result::DataError::ConnectionPoolError(format!("{}", err))),
     }
