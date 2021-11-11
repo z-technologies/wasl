@@ -1,6 +1,7 @@
 use crate::models::KeyType;
 use crate::schema::users;
 
+use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Identifiable, Queryable, AsChangeset)]
@@ -19,6 +20,7 @@ pub struct User {
     pub profile_photo: Option<String>,
 
     pub is_provider: bool,
+    pub created_at: NaiveDateTime,
 }
 
 #[derive(Debug, Insertable, Serialize, Deserialize)]

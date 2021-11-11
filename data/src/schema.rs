@@ -36,6 +36,7 @@ table! {
         last_name -> Nullable<Varchar>,
         profile_photo -> Nullable<Varchar>,
         is_provider -> Bool,
+        created_at -> Timestamptz,
     }
 }
 
