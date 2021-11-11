@@ -37,8 +37,8 @@ impl<'a> DbContext<'a> {
 }
 
 pub fn create_connection_pool() -> result::Result<DbPool> {
-    let url = std::env::var("DATABASE_URL")?;
-    let manager = DbConnectionManager::new(url);
+    let db_url = std::env::var("DatabaseUrl")?;
+    let manager = DbConnectionManager::new(db_url);
 
     match DbPool::builder().build(manager) {
         Ok(pool) => Ok(pool),
