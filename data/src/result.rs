@@ -2,13 +2,17 @@ use derive_more::{Display, From};
 
 #[derive(Debug, Display, From)]
 pub enum DataError {
-    #[display(fmt = "Database Error: {}", _0)]
+    #[display(fmt = "Database Error: {:?}", _0)]
     DatabaseError(diesel::result::Error),
 
-    #[display(fmt = "Connection Error: {}", _0)]
+    #[display(fmt = "Connection Error: {:?}", _0)]
     ConnectionError(diesel::result::ConnectionError),
 
-    #[display(fmt = "Environment Error: {}", _0)]
+    #[display(fmt = "Connection Pool: {:?}", _0)]
+    #[from(ignore)]
+    ConnectionPoolError(String),
+
+    #[display(fmt = "Environment Error: {:?}", _0)]
     EnvironmentError(std::env::VarError),
 }
 
