@@ -1,4 +1,4 @@
-use crate::result::{ApiError, ApiResult};
+use crate::result::ApiResult;
 use crate::services::auth::AuthSerivce;
 
 use data::context::DbContext;
