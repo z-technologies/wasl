@@ -3,15 +3,15 @@ use data_derive;
 use crate::models::admin::*;
 use crate::models::group::*;
 
-use crate::repos::{DbConnection, Repo, RepoTypes};
+use crate::repos::{DbPool, DbPooledConnection, Repo, RepoTypes};
 use crate::result;
 
 use diesel::pg::expression::dsl::any;
 use diesel::prelude::*;
 
 #[derive(data_derive::Repository)]
-pub struct AdminsRepo<'a> {
-    pub db: &'a DbConnection,
+pub struct AdminsRepo<'db> {
+    pub pool: &'db DbPool,
 }
 
 impl<'a> RepoTypes for AdminsRepo<'a> {
@@ -28,6 +28,6 @@ impl<'a> AdminsRepo<'a> {
 
         Ok(groups::table
             .filter(groups::id.eq(any(group_ids)))
-            .load::<Group>(self.db)?)
+            .load::<Group>(&self.get_connection()?)?)
     }
 }
