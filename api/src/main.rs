@@ -1,7 +1,7 @@
 extern crate dotenv;
 
-mod config;
 mod handlers;
+mod setup;
 
 use actix_web::{App, HttpServer};
 use dotenv::dotenv;
@@ -14,7 +14,7 @@ async fn main() -> std::io::Result<()> {
     let listen_ep = env::var("ListenEndpoint").expect("listen address");
     println!("{}", listen_ep);
 
-    HttpServer::new(|| App::new().configure(config::configure_server))
+    HttpServer::new(|| App::new().configure(setup::setup_webserver))
         .bind(listen_ep)?
         .run()
         .await
