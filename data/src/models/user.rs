@@ -23,10 +23,10 @@ pub struct User {
 
 #[derive(Debug, Insertable, Serialize, Deserialize)]
 #[table_name = "users"]
-pub struct NewUser<'a> {
-    pub username: &'a str,
-    pub email: &'a str,
-    pub first_name: Option<&'a str>,
-    pub last_name: Option<&'a str>,
+pub struct NewUser {
+    pub username: String,
+    pub email: String,
+    pub first_name: Option<String>,
+    pub last_name: Option<String>,
     pub is_provider: Option<bool>,
 }

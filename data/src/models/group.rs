@@ -11,6 +11,6 @@ pub struct Group {
 
 #[derive(Debug, Insertable, Serialize, Deserialize)]
 #[table_name = "groups"]
-pub struct NewGroup<'a> {
-    pub name: &'a str,
+pub struct NewGroup {
+    pub name: String,
 }
