@@ -12,7 +12,6 @@ async fn main() -> std::io::Result<()> {
     dotenv().ok();
 
     let listen_ep = env::var("ListenEndpoint").expect("listen address");
-    println!("{}", listen_ep);
 
     HttpServer::new(|| App::new().configure(setup::setup_webserver))
         .bind(listen_ep)?
