@@ -9,18 +9,21 @@ use crate::result;
 use diesel::pg::expression::dsl::any;
 use diesel::prelude::*;
 
-#[derive(data_derive::Repository)]
-pub struct AdminsRepo<'db> {
-    pub pool: &'db DbPool,
+#[derive(Clone, data_derive::Repository)]
+pub struct AdminsRepo {
+    pub pool: DbPool,
 }
 
-impl<'a> RepoTypes for AdminsRepo<'a> {
+impl RepoTypes for AdminsRepo {
     type Model = Admin;
-    type InsertModel = NewAdmin<'a>;
+    type InsertModel = NewAdmin;
 }
 
-impl<'a> AdminsRepo<'a> {
-    pub fn get_admin_groups(&self, admin: &Admin) -> result::Result<Vec<Group>> {
+impl AdminsRepo {
+    pub fn get_admin_groups(
+        &self,
+        admin: &Admin,
+    ) -> result::Result<Vec<Group>> {
         use crate::schema::admin_groups::dsl::*;
         use crate::schema::groups;
 

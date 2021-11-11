@@ -17,7 +17,7 @@ fn repo_impl(ast: &syn::DeriveInput) -> quote::Tokens {
     let table_name = Ident::from(get_entity_name(&name).to_lowercase());
 
     quote! {
-        impl<'db> Repo for #name<'db> {
+        impl Repo for #name {
             fn get_all(&self) -> result::Result<Vec<Self::Model>> {
                 use crate::schema::#table_name::dsl::*;
                 Ok(#table_name.load::<Self::Model>(&self.get_connection()?)?)

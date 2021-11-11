@@ -7,17 +7,17 @@ use crate::result;
 
 use diesel::prelude::*;
 
-#[derive(data_derive::Repository)]
-pub struct UsersRepo<'db> {
-    pub pool: &'db DbPool,
+#[derive(Clone, data_derive::Repository)]
+pub struct UsersRepo {
+    pub pool: DbPool,
 }
 
-impl<'db> RepoTypes for UsersRepo<'db> {
+impl RepoTypes for UsersRepo {
     type Model = User;
-    type InsertModel = NewUser<'db>;
+    type InsertModel = NewUser;
 }
 
-impl<'db> UsersRepo<'db> {
+impl UsersRepo {
     pub fn get_by_username<'a>(&self, uname: &'a str) -> result::Result<User> {
         use crate::schema::users::dsl::*;
         Ok(users

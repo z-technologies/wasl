@@ -7,12 +7,12 @@ use crate::result;
 
 use diesel::prelude::*;
 
-#[derive(data_derive::Repository)]
-pub struct GroupsRepo<'db> {
-    pub pool: &'db DbPool,
+#[derive(Clone, data_derive::Repository)]
+pub struct GroupsRepo {
+    pub pool: DbPool,
 }
 
-impl<'a> RepoTypes for GroupsRepo<'a> {
+impl RepoTypes for GroupsRepo {
     type Model = Group;
-    type InsertModel = NewGroup<'a>;
+    type InsertModel = NewGroup;
 }

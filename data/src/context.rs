@@ -5,42 +5,45 @@ use crate::repos::admins_repo::AdminsRepo;
 use crate::repos::groups_repo::GroupsRepo;
 use crate::repos::users_repo::UsersRepo;
 
-pub struct DbContext<'db> {
-    pub pool: &'db DbPool,
-
-    users: UsersRepo<'db>,
-    admins: AdminsRepo<'db>,
-    groups: GroupsRepo<'db>,
+#[derive(Clone)]
+pub struct DbContext {
+    users: UsersRepo,
+    admins: AdminsRepo,
+    groups: GroupsRepo,
 }
 
-impl<'a> DbContext<'a> {
-    pub fn new(pool: &'a DbPool) -> DbContext<'a> {
-        DbContext::<'a> {
-            pool,
-            users: UsersRepo::<'a> { pool },
-            admins: AdminsRepo::<'a> { pool },
-            groups: GroupsRepo::<'a> { pool },
+impl DbContext {
+    pub fn new(pool: DbPool) -> DbContext {
+        DbContext {
+            users: UsersRepo { pool: pool.clone() },
+            admins: AdminsRepo { pool: pool.clone() },
+            groups: GroupsRepo { pool }, // move
         }
     }
 
-    pub fn users(&self) -> &UsersRepo<'a> {
+    pub fn users(&self) -> &UsersRepo {
         &self.users
     }
 
-    pub fn admins(&self) -> &AdminsRepo<'a> {
+    pub fn admins(&self) -> &AdminsRepo {
         &self.admins
     }
 
-    pub fn groups(&self) -> &GroupsRepo<'a> {
+    pub fn groups(&self) -> &GroupsRepo {
         &self.groups
     }
 }
 
-pub fn create_connection_pool(url: &str, max_connections: u32) -> result::Result<DbPool> {
+pub fn create_connection_pool(
+    url: &str,
+    max_connections: u32,
+) -> result::Result<DbPool> {
     let manager = DbConnectionManager::new(url);
 
     match DbPool::builder().max_size(max_connections).build(manager) {
         Ok(pool) => Ok(pool),
-        Err(err) => Err(result::DataError::ConnectionPoolError(format!("{}", err))),
+        Err(err) => {
+            Err(result::DataError::ConnectionPoolError(format!("{}", err)))
+        }
     }
 }
