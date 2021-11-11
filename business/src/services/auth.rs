@@ -5,7 +5,7 @@ use crate::result;
 use crate::security::password::password_matches;
 
 struct AuthSerivce<'ctx> {
-    ctx: &'ctx DbContext<'ctx>,
+    ctx: &'ctx DbContext,
 }
 
 impl<'ctx> AuthSerivce<'ctx> {
@@ -18,7 +18,10 @@ impl<'ctx> AuthSerivce<'ctx> {
         Self::login_with_password(user, password)
     }
 
-    fn login_with_password<'a>(user: User, password: &'a str) -> result::Result<User> {
+    fn login_with_password<'a>(
+        user: User,
+        password: &'a str,
+    ) -> result::Result<User> {
         if let Some(password_hash) = &user.password_hash {
             if let Some(password_salt) = &user.password_salt {
                 if password_matches(password, &password_hash, &password_salt) {
