@@ -21,4 +21,9 @@ impl<'db> UsersRepo<'db> {
         use crate::schema::users::dsl::*;
         Ok(users.filter(username.eq(uname)).first::<User>(self.db)?)
     }
+
+    pub fn get_by_email<'a>(&self, em: &'a str) -> result::Result<User> {
+        use crate::schema::users::dsl::*;
+        Ok(users.filter(email.eq(em)).first::<User>(self.db)?)
+    }
 }
