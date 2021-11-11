@@ -1,3 +1,6 @@
+use crate::handlers::auth;
+use crate::handlers::echo;
+
 use actix_web::web;
 use std::env;
 
@@ -12,8 +15,13 @@ pub fn setup_webserver(cfg: &mut web::ServiceConfig) {
     let db_ctx = data::context::DbContext::new(db_pool);
 
     cfg.service({
-        web::scope("/api")
-            .service(web::scope("/v1").service(crate::handlers::echo::echo))
+        web::scope("/v1")
+            .service(web::scope("/test").service(echo::echo))
+            .service(
+                web::scope("/auth")
+                    .service(auth::signin)
+                    .service(auth::signup),
+            )
     })
     .data(db_ctx.clone());
 }
