@@ -14,7 +14,7 @@ pub fn generate_random_bytes<'a>(buf: &mut [u8]) {
     thread_rng().fill_bytes(buf);
 }
 
-pub fn generate_random_string<D>(len: usize, dist: D) -> String {
+pub fn generate_random_string<D>(len: usize) -> String {
     thread_rng()
         .sample_iter(&Ascii)
         .take(len)
