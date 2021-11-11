@@ -1,10 +1,13 @@
 extern crate actix_web;
+extern crate argon2;
 extern crate derive_more;
 extern crate dotenv;
+extern crate hex;
 extern crate serde;
 
 mod handlers;
 mod result;
+mod security;
 mod services;
 mod setup;
 
