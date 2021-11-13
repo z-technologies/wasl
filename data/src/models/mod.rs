@@ -1,3 +1,5 @@
+pub mod validate;
+
 pub mod admin;
 pub mod group;
 pub mod user;
