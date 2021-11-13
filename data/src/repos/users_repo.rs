@@ -23,6 +23,7 @@ impl UsersRepo {
         uname: &'a str,
     ) -> result::Result<Option<User>> {
         use crate::schema::users::dsl::*;
+
         Ok(users
             .filter(username.eq(uname))
             .first::<User>(&self.get_connection()?)
@@ -34,6 +35,7 @@ impl UsersRepo {
         em: &'a str,
     ) -> result::Result<Option<User>> {
         use crate::schema::users::dsl::*;
+
         Ok(users
             .filter(email.eq(em))
             .first::<User>(&self.get_connection()?)
