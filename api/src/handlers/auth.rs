@@ -1,8 +1,9 @@
-use crate::result::ApiResult;
+use crate::result::{ApiError, ApiResult};
 use crate::services::auth::AuthSerivce;
 
 use data::context::DbContext;
 use data::models::user::NewUser;
+use data::repos::Repo;
 
 use actix_web::{post, web, HttpResponse};
 use serde::Deserialize;
@@ -21,12 +22,22 @@ pub async fn signin(
 
 #[post("/signup")]
 pub async fn signup(
-    _ctx: web::Data<DbContext>,
+    ctx: web::Data<DbContext>,
     form: web::Json<NewUser>,
 ) -> ApiResult<HttpResponse> {
     form.validate()?;
 
-    Ok(HttpResponse::Ok().body("success"))
+    if ctx.get_ref().users().duplicate_username(&form.username)? {
+        return Err(ApiError::UsernameAlreadyInUse);
+    }
+
+    if ctx.get_ref().users().duplicate_email(&form.email)? {
+        return Err(ApiError::EmailAlreadyInUse);
+    }
+
+    let model = web::block(move || ctx.get_ref().users().insert(&form)).await?;
+
+    Ok(HttpResponse::Created().json(model))
 }
 
 #[derive(Deserialize)]
