@@ -39,4 +39,23 @@ impl UsersRepo {
             .first::<User>(&self.get_connection()?)
             .optional()?)
     }
+
+    pub fn duplicate_username<'a>(
+        &self,
+        uname: &'a str,
+    ) -> result::Result<bool> {
+        use crate::schema::users::dsl::*;
+        use diesel::dsl::*;
+
+        Ok(select(exists(users.filter(username.eq(uname))))
+            .get_result(&self.get_connection()?)?)
+    }
+
+    pub fn duplicate_email<'a>(&self, em: &'a str) -> result::Result<bool> {
+        use crate::schema::users::dsl::*;
+        use diesel::dsl::*;
+
+        Ok(select(exists(users.filter(email.eq(em))))
+            .get_result(&self.get_connection()?)?)
+    }
 }
