@@ -2,9 +2,11 @@ use crate::result::ApiResult;
 use crate::services::auth::AuthSerivce;
 
 use data::context::DbContext;
+use data::models::user::NewUser;
 
-use actix_web::{post, web, HttpResponse, Responder};
+use actix_web::{post, web, HttpResponse};
 use serde::Deserialize;
+use validator::Validate;
 
 #[post("/signin")]
 pub async fn signin(
@@ -18,8 +20,13 @@ pub async fn signin(
 }
 
 #[post("/signup")]
-pub async fn signup() -> impl Responder {
-    format!("Hello from sign up")
+pub async fn signup(
+    _ctx: web::Data<DbContext>,
+    form: web::Json<NewUser>,
+) -> ApiResult<HttpResponse> {
+    form.validate()?;
+
+    Ok(HttpResponse::Ok().body("success"))
 }
 
 #[derive(Deserialize)]
