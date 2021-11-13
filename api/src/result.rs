@@ -1,6 +1,7 @@
 use actix_web::dev::HttpResponseBuilder;
 use actix_web::http::{header, StatusCode};
 use actix_web::{HttpResponse, ResponseError};
+use validator::ValidationErrors;
 
 use derive_more::{Display, From};
 
@@ -9,17 +10,14 @@ pub enum ApiError {
     #[display(fmt = "An internal error occurred. Please try again later.")]
     InternalDataError(data::result::DataError),
 
-    #[display(fmt = "An internal error occurred. Please try again later.")]
-    InternalBusinessError(business::result::BusinessError),
-
     #[display(fmt = "Invalid username or password")]
     InvalidUsernameOrPassword,
 
     #[display(fmt = "Password is not set")]
     PasswordNotSet,
 
-    #[display(fmt = "Validation error on field: {}", field)]
-    ValidationError { field: String },
+    #[display(fmt = "Validation error on field: {:?}", _0)]
+    ValidationError(ValidationErrors),
 }
 
 pub type ApiResult<T> = std::result::Result<T, ApiError>;
@@ -32,8 +30,7 @@ impl ResponseError for ApiError {
     }
     fn status_code(&self) -> StatusCode {
         match *self {
-            ApiError::InternalDataError(..)
-            | ApiError::InternalBusinessError(..) => {
+            ApiError::InternalDataError(..) => {
                 StatusCode::INTERNAL_SERVER_ERROR
             }
 
