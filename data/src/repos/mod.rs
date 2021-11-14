@@ -1,4 +1,3 @@
-pub mod admins_repo;
 pub mod groups_repo;
 pub mod users_repo;
 
@@ -30,6 +29,5 @@ pub trait Repo: RepoTypes {
     ) -> result::Result<&'a Self::Model>;
 
     fn delete(&self, item: &Self::Model) -> result::Result<()>;
-
     fn get_connection(&self) -> result::Result<DbPooledConnection>;
 }
