@@ -1,9 +1,8 @@
 use actix_web::dev::HttpResponseBuilder;
 use actix_web::http::{header, StatusCode};
 use actix_web::{HttpResponse, ResponseError};
-use validator::ValidationErrors;
-
 use derive_more::{Display, From};
+use validator::ValidationErrors;
 
 #[derive(Debug, Display, From)]
 pub enum ApiError {
@@ -12,6 +11,9 @@ pub enum ApiError {
 
     #[display(fmt = "An internal error occurred. Please try again later.")]
     InternalSechulingError,
+
+    #[display(fmt = "An internal error occurred. Please try again later.")]
+    InternalEnvironmentError(std::env::VarError),
 
     #[display(fmt = "Invalid username or password")]
     InvalidUsernameOrPassword,
@@ -41,7 +43,8 @@ impl ResponseError for ApiError {
     fn status_code(&self) -> StatusCode {
         match *self {
             ApiError::InternalDataError(..)
-            | ApiError::InternalSechulingError => {
+            | ApiError::InternalSechulingError
+            | ApiError::InternalEnvironmentError(..) => {
                 StatusCode::INTERNAL_SERVER_ERROR
             }
 
