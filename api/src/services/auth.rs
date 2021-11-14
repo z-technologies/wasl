@@ -1,5 +1,5 @@
 use crate::result::{ApiError, ApiResult};
-use crate::security::password::password_matches;
+use crate::security::password::is_match;
 
 use data::context::DbContext;
 use data::models::user::User;
@@ -25,15 +25,13 @@ impl<'ctx> AuthSerivce<'ctx> {
 
     fn _signin_impl<'a>(user: User, password: &'a str) -> ApiResult<User> {
         if let Some(password_hash) = &user.password_hash {
-            if let Some(password_salt) = &user.password_salt {
-                if password_matches(password, &password_hash, &password_salt) {
-                    return Ok(user);
-                } else {
-                    return Err(ApiError::InvalidUsernameOrPassword);
-                }
+            if is_match(password, &password_hash) {
+                Ok(user)
+            } else {
+                Err(ApiError::InvalidUsernameOrPassword)
             }
+        } else {
+            Err(ApiError::PasswordNotSet)
         }
-
-        Err(ApiError::PasswordNotSet)
     }
 }
