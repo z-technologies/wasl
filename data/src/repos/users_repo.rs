@@ -1,10 +1,13 @@
 use data_derive;
 
-use crate::models::user::{NewUser, User};
+use crate::models::group::*;
+use crate::models::user::*;
+
 use crate::repos::DbPooledConnection;
 use crate::repos::{DbPool, Repo, RepoTypes};
 use crate::result;
 
+use diesel::dsl::any;
 use diesel::prelude::*;
 
 #[derive(Clone, data_derive::Repository)]
@@ -59,5 +62,16 @@ impl UsersRepo {
 
         Ok(select(exists(users.filter(email.eq(em))))
             .get_result(&self.get_connection()?)?)
+    }
+
+    pub fn get_user_groups(&self, user: &User) -> result::Result<Vec<Group>> {
+        use crate::schema::groups;
+        use crate::schema::user_groups::dsl::*;
+
+        let group_ids = UserGroup::belonging_to(user).select(group_id);
+
+        Ok(groups::table
+            .filter(groups::id.eq(any(group_ids)))
+            .load::<Group>(&self.get_connection()?)?)
     }
 }
