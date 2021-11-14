@@ -1,10 +1,7 @@
 use data_derive;
 
-use crate::models::group::*;
-use crate::models::user::*;
-
-use crate::repos::DbPooledConnection;
-use crate::repos::{DbPool, Repo, RepoTypes};
+use crate::models::{Group, NewUser, User, UserGroup};
+use crate::repos::{DbPool, DbPooledConnection, Repo, RepoTypes};
 use crate::result;
 
 use diesel::dsl::any;
