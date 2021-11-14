@@ -21,26 +21,23 @@ pub struct User {
 
     #[validate(regex = "RE_USERNAME")]
     pub username: String,
-
-    #[serde(skip)]
-    pub password_hash: Option<String>,
-    #[serde(skip)]
-    pub password_salt: Option<String>,
-
     #[validate(email)]
     pub email: String,
-
     #[serde(skip)]
-    pub is_active: bool,
+    pub password_hash: Option<String>,
 
     #[validate(length(min = 2, max = 32))]
     pub first_name: Option<String>,
     #[validate(length(min = 2, max = 32))]
     pub last_name: Option<String>,
+    #[validate(url)]
     pub profile_photo: Option<String>,
 
     #[serde(skip)]
     pub is_provider: bool,
+    #[serde(skip)]
+    pub is_active: bool,
+
     pub created_at: NaiveDateTime,
 }
 
@@ -51,9 +48,6 @@ pub struct NewUser {
     pub username: String,
     #[validate(email)]
     pub email: String,
-    #[validate(length(min = 2, max = 32))]
-    pub first_name: Option<String>,
-    #[validate(length(min = 2, max = 32))]
-    pub last_name: Option<String>,
-    pub is_provider: Option<bool>,
+
+    pub is_provider: bool,
 }

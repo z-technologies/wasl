@@ -28,14 +28,13 @@ table! {
     users (id) {
         id -> Int4,
         username -> Varchar,
-        password_hash -> Nullable<Varchar>,
-        password_salt -> Nullable<Varchar>,
         email -> Varchar,
-        is_active -> Bool,
+        password_hash -> Nullable<Varchar>,
         first_name -> Nullable<Varchar>,
         last_name -> Nullable<Varchar>,
         profile_photo -> Nullable<Varchar>,
         is_provider -> Bool,
+        is_active -> Bool,
         created_at -> Timestamptz,
     }
 }
