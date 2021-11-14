@@ -1,26 +1,15 @@
 table! {
-    admin_groups (id) {
-        id -> Int4,
-        admin_id -> Int4,
-        group_id -> Int4,
-    }
-}
-
-table! {
-    admins (id) {
-        id -> Int4,
-        username -> Varchar,
-        password_hash -> Varchar,
-        password_salt -> Varchar,
-        first_name -> Nullable<Varchar>,
-        last_name -> Nullable<Varchar>,
-    }
-}
-
-table! {
     groups (id) {
         id -> Int4,
         name -> Varchar,
+    }
+}
+
+table! {
+    user_groups (id) {
+        id -> Int4,
+        user_id -> Int4,
+        group_id -> Int4,
     }
 }
 
@@ -30,21 +19,20 @@ table! {
         username -> Varchar,
         email -> Varchar,
         password_hash -> Nullable<Varchar>,
+        is_active -> Bool,
         first_name -> Nullable<Varchar>,
         last_name -> Nullable<Varchar>,
         profile_photo -> Nullable<Varchar>,
-        is_provider -> Bool,
-        is_active -> Bool,
+        cached_balance -> Float8,
         created_at -> Timestamptz,
     }
 }
 
-joinable!(admin_groups -> admins (admin_id));
-joinable!(admin_groups -> groups (group_id));
+joinable!(user_groups -> groups (group_id));
+joinable!(user_groups -> users (user_id));
 
 allow_tables_to_appear_in_same_query!(
-    admin_groups,
-    admins,
     groups,
+    user_groups,
     users,
 );
