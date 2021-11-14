@@ -1,8 +1,5 @@
-use crate::repos::{DbConnectionManager, DbPool};
-use crate::result;
-
-use crate::repos::groups_repo::GroupsRepo;
-use crate::repos::users_repo::UsersRepo;
+use crate::repos::{DbConnectionManager, DbPool, GroupsRepo, UsersRepo};
+use crate::result::{DataError, DataResult};
 
 #[derive(Clone)]
 pub struct DbContext {
@@ -30,13 +27,11 @@ impl DbContext {
 pub fn create_connection_pool(
     url: &str,
     max_connections: u32,
-) -> result::Result<DbPool> {
+) -> DataResult<DbPool> {
     let manager = DbConnectionManager::new(url);
 
     match DbPool::builder().max_size(max_connections).build(manager) {
         Ok(pool) => Ok(pool),
-        Err(err) => {
-            Err(result::DataError::ConnectionPoolError(format!("{}", err)))
-        }
+        Err(err) => Err(DataError::ConnectionPoolError(format!("{}", err))),
     }
 }

@@ -14,54 +14,54 @@ pub fn repo(input: TokenStream) -> TokenStream {
 
 fn repo_impl(ast: &syn::DeriveInput) -> quote::Tokens {
     let name = &ast.ident;
-    let table_name = Ident::from(get_entity_name(&name).to_lowercase());
+    let table_name = Ident::from(get_table_name(&name));
 
     quote! {
         impl Repo for #name {
-            fn get_all(&self) -> result::Result<Vec<Self::Model>> {
+            fn get_all(&self) -> DataResult<Vec<Self::Model>> {
                 use crate::schema::#table_name::dsl::*;
                 Ok(#table_name.load::<Self::Model>(&self.get_connection()?)?)
             }
 
-            fn get(&self, key: crate::models::KeyType) -> result::Result<Self::Model> {
+            fn get(&self, key: crate::models::KeyType) -> DataResult<Self::Model> {
                 use crate::schema::#table_name::dsl::*;
                 Ok(#table_name.filter(id.eq(key)).get_result(&self.get_connection()?)?)
             }
 
-            fn insert<'a>(&self, item: &'a Self::InsertModel) -> result::Result<Self::Model> {
+            fn insert<'a>(&self, item: &'a Self::InsertModel) -> DataResult<Self::Model> {
                 use crate::schema::#table_name::dsl::*;
                 Ok(diesel::insert_into(#table_name)
                     .values(item)
                     .get_result::<Self::Model>(&self.get_connection()?)?)
             }
 
-            fn update<'a>(&self, item: &'a Self::Model) -> result::Result<&'a Self::Model> {
+            fn update<'a>(&self, item: &'a Self::Model) -> DataResult<&'a Self::Model> {
                 use crate::schema::#table_name::dsl::*;
                 diesel::update(#table_name).set(item).execute(&self.get_connection()?)?;
                 Ok(item)
             }
 
-            fn delete(&self, item: &Self::Model) -> result::Result<()> {
+            fn delete(&self, item: &Self::Model) -> DataResult<()> {
                 use crate::schema::#table_name::dsl::*;
                 match diesel::delete(#table_name
                                         .filter(id.eq(item.id)))
                                         .execute(&self.get_connection()?) {
                     Ok(_) => Ok(()),
-                    Err(err) => Err(result::DataError::from(err)),
+                    Err(err) => Err(DataError::from(err)),
                 }
             }
 
-            fn get_connection(&self) -> result::Result<DbPooledConnection> {
+            fn get_connection(&self) -> DataResult<DbPooledConnection> {
                 match self.pool.get() {
                     Ok(conn) => Ok(conn),
-                    Err(err) => Err(result::DataError::ConnectionPoolError(format!("{}", err))),
+                    Err(err) => Err(DataError::ConnectionPoolError(format!("{}", err))),
                 }
             }
         }
     }
 }
 
-fn get_entity_name(name: &Ident) -> String {
+fn get_table_name(name: &Ident) -> String {
     let name = format!("{}", &name);
 
     if name.ends_with("Repo") {
@@ -71,4 +71,5 @@ fn get_entity_name(name: &Ident) -> String {
     } else {
         name
     }
+    .to_lowercase()
 }

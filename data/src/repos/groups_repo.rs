@@ -1,13 +1,11 @@
-use data_derive;
-
 use crate::models::group::*;
-
 use crate::repos::{DbPool, DbPooledConnection, Repo, RepoTypes};
-use crate::result;
+use crate::result::{DataError, DataResult};
 
+use data_derive::Repository;
 use diesel::prelude::*;
 
-#[derive(Clone, data_derive::Repository)]
+#[derive(Clone, Repository)]
 pub struct GroupsRepo {
     pub pool: DbPool,
 }

@@ -1,5 +1,5 @@
 use crate::models::KeyType;
-use crate::result;
+use crate::result::DataResult;
 
 use diesel::r2d2::{ConnectionManager, Pool, PooledConnection};
 use diesel::PgConnection;
@@ -16,15 +16,12 @@ pub trait RepoTypes {
 }
 
 pub trait Repo: RepoTypes {
-    fn get_all(&self) -> result::Result<Vec<Self::Model>>;
-    fn get(&self, id: KeyType) -> result::Result<Self::Model>;
+    fn get_all(&self) -> DataResult<Vec<Self::Model>>;
+    fn get(&self, id: KeyType) -> DataResult<Self::Model>;
 
-    fn insert(&self, item: &Self::InsertModel) -> result::Result<Self::Model>;
-    fn update<'a>(
-        &self,
-        item: &'a Self::Model,
-    ) -> result::Result<&'a Self::Model>;
+    fn insert(&self, item: &Self::InsertModel) -> DataResult<Self::Model>;
+    fn update<'a>(&self, item: &'a Self::Model) -> DataResult<&'a Self::Model>;
 
-    fn delete(&self, item: &Self::Model) -> result::Result<()>;
-    fn get_connection(&self) -> result::Result<DbPooledConnection>;
+    fn delete(&self, item: &Self::Model) -> DataResult<()>;
+    fn get_connection(&self) -> DataResult<DbPooledConnection>;
 }

@@ -13,4 +13,4 @@ pub enum DataError {
     ConnectionPoolError(String),
 }
 
-pub type Result<T> = std::result::Result<T, DataError>;
+pub type DataResult<T> = std::result::Result<T, DataError>;
