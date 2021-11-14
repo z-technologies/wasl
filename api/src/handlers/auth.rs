@@ -17,6 +17,8 @@ pub async fn signin(
     let auth = AuthSerivce { ctx: ctx.get_ref() };
     let _user = auth.signin(&form.username, &form.password)?;
 
+    // TODO:
+    // handle token creation
     Ok(HttpResponse::Ok().body("success"))
 }
 
@@ -35,8 +37,10 @@ pub async fn signup(
         return Err(ApiError::EmailAlreadyInUse);
     }
 
-    let model = web::block(move || ctx.get_ref().users().insert(&form)).await?;
+    // TODO:
+    // handle email verification
 
+    let model = web::block(move || ctx.get_ref().users().insert(&form)).await?;
     Ok(HttpResponse::Created().json(model))
 }
 
