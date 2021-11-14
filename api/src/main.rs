@@ -1,9 +1,9 @@
 extern crate actix_web;
 extern crate argon2;
+extern crate base64;
 extern crate derive_more;
 extern crate dotenv;
 extern crate env_logger;
-extern crate hex;
 extern crate serde;
 extern crate validator;
 
