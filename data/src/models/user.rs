@@ -1,5 +1,8 @@
+use crate::models::group::Group;
 use crate::models::validate::RE_USERNAME;
 use crate::models::KeyType;
+
+use crate::schema::user_groups;
 use crate::schema::users;
 
 use chrono::NaiveDateTime;
@@ -25,6 +28,8 @@ pub struct User {
     pub email: String,
     #[serde(skip)]
     pub password_hash: Option<String>,
+    #[serde(skip)]
+    pub is_active: bool,
 
     #[validate(length(min = 2, max = 32))]
     pub first_name: Option<String>,
@@ -33,11 +38,7 @@ pub struct User {
     #[validate(url)]
     pub profile_photo: Option<String>,
 
-    #[serde(skip)]
-    pub is_provider: bool,
-    #[serde(skip)]
-    pub is_active: bool,
-
+    pub cached_balance: f64,
     pub created_at: NaiveDateTime,
 }
 
@@ -48,6 +49,13 @@ pub struct NewUser {
     pub username: String,
     #[validate(email)]
     pub email: String,
+}
 
-    pub is_provider: bool,
+#[derive(Identifiable, Queryable, Associations)]
+#[belongs_to(User)]
+#[belongs_to(Group)]
+pub struct UserGroup {
+    pub id: KeyType,
+    pub user_id: KeyType,
+    pub group_id: KeyType,
 }
