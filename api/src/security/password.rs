@@ -1,24 +1,28 @@
+use crate::security::random::generate_random_bytes;
+
 use argon2::{self, Config};
-use hex;
+use base64;
 
-const PASSWORD_HASH_LENGTH: u32 = 32;
+pub fn is_match<'a>(password: &'a str, password_hash: &'a str) -> bool {
+    let password_hash = base64::decode(password_hash).unwrap();
+    let password_encoded = std::str::from_utf8(&password_hash).unwrap();
 
-pub fn hash_password<'a>(password: &'a str, salt: &'a str) -> String {
-    let mut config = Config::default();
-    config.hash_length = PASSWORD_HASH_LENGTH;
-
-    let password_bytes = hex::decode(password).unwrap();
-    let salt_bytes = hex::decode(salt).unwrap();
-    let encoded =
-        argon2::hash_encoded(&password_bytes, &salt_bytes, &config).unwrap();
-
-    hex::encode(encoded)
+    argon2::verify_encoded(password_encoded, &password.as_bytes())
+        .unwrap_or(false)
 }
 
-pub fn password_matches<'a>(
-    password: &'a str,
-    password_hash: &'a str,
-    password_salt: &'a str,
-) -> bool {
-    hash_password(password, password_salt) == password_hash
+pub fn make_password_hash<'a>(password: &'a str) -> String {
+    let mut salt_buf: [u8; 16] = [0u8; 16];
+    generate_random_bytes(&mut salt_buf);
+
+    hash_password(password, &salt_buf)
+}
+
+fn hash_password<'a>(password: &'a str, salt: &'a [u8]) -> String {
+    let config = Config::default();
+
+    let bytes = password.as_bytes();
+    let encoded = argon2::hash_encoded(&bytes, &salt, &config).unwrap();
+
+    base64::encode(encoded)
 }
