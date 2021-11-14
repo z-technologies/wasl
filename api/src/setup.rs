@@ -7,7 +7,7 @@ use std::env;
 const MAX_POOL_CONNECTIONS: u32 = 4;
 
 pub fn setup_webserver(cfg: &mut web::ServiceConfig) {
-    let db_url = env::var("DatabaseUrl").expect("database url");
+    let db_url = env::var("DB_URL").expect("database url");
     let db_pool =
         data::context::create_connection_pool(&db_url, MAX_POOL_CONNECTIONS)
             .expect("could not create a database pool");
