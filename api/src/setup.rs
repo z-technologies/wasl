@@ -1,6 +1,8 @@
 use crate::handlers::auth;
 use crate::handlers::echo;
 
+use business::services::auth::AuthSerivce;
+
 use actix_web::web;
 use std::env;
 
@@ -12,7 +14,7 @@ pub fn setup_webserver(cfg: &mut web::ServiceConfig) {
         data::context::create_connection_pool(&db_url, MAX_POOL_CONNECTIONS)
             .expect("could not create a database pool");
 
-    let db_ctx = data::context::DbContext::new(db_pool);
+    let ctx = data::context::DbContext::new(db_pool);
 
     cfg.service({
         web::scope("/api/v1")
@@ -23,5 +25,6 @@ pub fn setup_webserver(cfg: &mut web::ServiceConfig) {
                     .service(auth::signup),
             )
     })
-    .data(db_ctx.clone());
+    .data(ctx.clone())
+    .data(AuthSerivce { ctx });
 }
