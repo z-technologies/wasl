@@ -1,6 +1,4 @@
 extern crate actix_web;
-extern crate argon2;
-extern crate base64;
 extern crate chrono;
 extern crate derive_more;
 extern crate dotenv;
@@ -11,7 +9,6 @@ extern crate validator;
 
 mod handlers;
 mod result;
-mod security;
 mod services;
 mod setup;
 

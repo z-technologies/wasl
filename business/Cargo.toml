@@ -6,4 +6,7 @@ edition = "2021"
 [dependencies]
 data = { path = "../data" }
 
+base64      = "0.13.0"
 derive_more = "0.99"
+rand        = "0.8"
+rust-argon2 = "0.8.3"
