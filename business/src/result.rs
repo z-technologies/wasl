@@ -4,6 +4,8 @@ use derive_more::{Display, From};
 
 use std::error;
 
+pub type Result<T> = std::result::Result<T, UserError>;
+
 #[derive(Debug, Display, From)]
 pub enum InternalError {
     #[display(fmt = "data error: {}", _0)]
