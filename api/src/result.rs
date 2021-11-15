@@ -15,9 +15,6 @@ pub enum ApiError {
     UserError(UserError),
 
     #[display(fmt = "An internal error occurred. Please try again later.")]
-    InternalDataError(data::result::DataError),
-
-    #[display(fmt = "An internal error occurred. Please try again later.")]
     InternalSechulingError,
 
     #[display(fmt = "An internal error occurred. Please try again later.")]
@@ -25,12 +22,6 @@ pub enum ApiError {
 
     #[display(fmt = "Validation error on field: {:?}", _0)]
     ValidationError(ValidationErrors),
-
-    #[display(fmt = "Username is already used")]
-    UsernameAlreadyInUse,
-
-    #[display(fmt = "Email is already used")]
-    EmailAlreadyInUse,
 }
 
 pub type ApiResult<T> = std::result::Result<T, ApiError>;
@@ -45,11 +36,6 @@ impl ResponseError for ApiError {
     fn status_code(&self) -> StatusCode {
         match *self {
             ApiError::ValidationError { .. } => StatusCode::BAD_REQUEST,
-
-            ApiError::UsernameAlreadyInUse | ApiError::EmailAlreadyInUse => {
-                StatusCode::CONFLICT
-            }
-
             _ => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }

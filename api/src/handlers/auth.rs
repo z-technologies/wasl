@@ -1,9 +1,8 @@
-use crate::result::{ApiError, ApiResult};
+use crate::result::ApiResult;
 
 use business::services::auth::AuthSerivce;
 use data::context::DbContext;
 use data::models::user::NewUser;
-use data::repos::Repo;
 
 use actix_web::{post, web, HttpResponse};
 use serde::Deserialize;
@@ -14,8 +13,11 @@ pub async fn signin(
     ctx: web::Data<DbContext>,
     form: web::Json<SigninForm>,
 ) -> ApiResult<HttpResponse> {
-    let auth = AuthSerivce { ctx: ctx.get_ref() };
-    let _user = auth.signin(&form.username, &form.password)?;
+    let _user = web::block(move || {
+        let auth = AuthSerivce { ctx: ctx.get_ref() };
+        auth.signin(&form.username, &form.password)
+    })
+    .await?;
 
     // TODO:
     // handle token creation
@@ -29,18 +31,12 @@ pub async fn signup(
 ) -> ApiResult<HttpResponse> {
     form.validate()?;
 
-    if ctx.get_ref().users().duplicate_username(&form.username)? {
-        return Err(ApiError::UsernameAlreadyInUse);
-    }
+    let model = web::block(move || {
+        let auth = AuthSerivce { ctx: ctx.get_ref() };
+        auth.signup(&form)
+    })
+    .await?;
 
-    if ctx.get_ref().users().duplicate_email(&form.email)? {
-        return Err(ApiError::EmailAlreadyInUse);
-    }
-
-    // TODO:
-    // handle email verification
-
-    let model = web::block(move || ctx.get_ref().users().insert(&form)).await?;
     Ok(HttpResponse::Created().json(model))
 }
 
