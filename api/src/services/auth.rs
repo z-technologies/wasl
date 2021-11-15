@@ -25,7 +25,7 @@ impl<'ctx> AuthSerivce<'ctx> {
 
     fn _signin_impl<'a>(user: User, password: &'a str) -> ApiResult<User> {
         if let Some(password_hash) = &user.password_hash {
-            if is_match(password, &password_hash) {
+            if is_match(password, &password_hash)? {
                 Ok(user)
             } else {
                 Err(ApiError::InvalidUsernameOrPassword)
