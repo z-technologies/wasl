@@ -5,11 +5,11 @@ use data::context::DbContext;
 use data::models::{NewUser, User};
 use data::repos::Repo;
 
-pub struct AuthSerivce<'ctx> {
-    pub ctx: &'ctx DbContext,
+pub struct AuthSerivce {
+    pub ctx: DbContext,
 }
 
-impl<'ctx> AuthSerivce<'ctx> {
+impl AuthSerivce {
     pub fn signin<'a>(
         &self,
         username: &'a str,
