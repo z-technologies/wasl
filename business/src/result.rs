@@ -28,6 +28,12 @@ pub enum InternalError {
 pub enum UserError {
     #[display(fmt = "internal error: {}", _0)]
     InternalError(InternalError),
+
+    #[display(fmt = "password not set")]
+    PasswordNotSet,
+
+    #[display(fmt = "invalid username or password")]
+    InvalidUsernameOrPassword,
 }
 
 impl error::Error for InternalError {}

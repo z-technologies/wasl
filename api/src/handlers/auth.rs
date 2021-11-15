@@ -1,6 +1,6 @@
 use crate::result::{ApiError, ApiResult};
-use crate::services::auth::AuthSerivce;
 
+use business::services::auth::AuthSerivce;
 use data::context::DbContext;
 use data::models::user::NewUser;
 use data::repos::Repo;

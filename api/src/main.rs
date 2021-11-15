@@ -9,7 +9,6 @@ extern crate validator;
 
 mod handlers;
 mod result;
-mod services;
 mod setup;
 
 use actix_web::{App, HttpServer};

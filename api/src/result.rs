@@ -23,12 +23,6 @@ pub enum ApiError {
     #[display(fmt = "An internal error occurred. Please try again later.")]
     InternalEnvironmentError(std::env::VarError),
 
-    #[display(fmt = "Invalid username or password")]
-    InvalidUsernameOrPassword,
-
-    #[display(fmt = "Password is not set")]
-    PasswordNotSet,
-
     #[display(fmt = "Validation error on field: {:?}", _0)]
     ValidationError(ValidationErrors),
 
@@ -50,8 +44,6 @@ impl ResponseError for ApiError {
 
     fn status_code(&self) -> StatusCode {
         match *self {
-            ApiError::InvalidUsernameOrPassword => StatusCode::UNAUTHORIZED,
-            ApiError::PasswordNotSet => StatusCode::FORBIDDEN,
             ApiError::ValidationError { .. } => StatusCode::BAD_REQUEST,
 
             ApiError::UsernameAlreadyInUse | ApiError::EmailAlreadyInUse => {
