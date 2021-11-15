@@ -1,5 +1,6 @@
 use data::result::DataError;
 
+use argon2;
 use derive_more::{Display, From};
 
 use std::error;
@@ -10,6 +11,9 @@ pub type Result<T> = std::result::Result<T, UserError>;
 pub enum InternalError {
     #[display(fmt = "data error: {}", _0)]
     DataError(DataError),
+
+    #[display(fmt = "hashing error: {}", _0)]
+    HashingError(argon2::Error),
 }
 
 #[derive(Debug, Display, From)]
