@@ -1,9 +1,11 @@
 use data::result::DataError;
 
 use argon2;
+use base64;
 use derive_more::{Display, From};
 
 use std::error;
+use std::str::Utf8Error;
 
 pub type Result<T> = std::result::Result<T, UserError>;
 
@@ -14,6 +16,12 @@ pub enum InternalError {
 
     #[display(fmt = "hashing error: {}", _0)]
     HashingError(argon2::Error),
+
+    #[display(fmt = "utf8 error: {}", _0)]
+    Utf8Error(Utf8Error),
+
+    #[display(fmt = "base64 decode error: {}", _0)]
+    Base64DecodeError(base64::DecodeError),
 }
 
 #[derive(Debug, Display, From)]
@@ -34,5 +42,17 @@ impl From<DataError> for UserError {
 impl From<argon2::Error> for UserError {
     fn from(err: argon2::Error) -> Self {
         UserError::InternalError(InternalError::HashingError(err))
+    }
+}
+
+impl From<Utf8Error> for UserError {
+    fn from(err: Utf8Error) -> Self {
+        UserError::InternalError(InternalError::Utf8Error(err))
+    }
+}
+
+impl From<base64::DecodeError> for UserError {
+    fn from(err: base64::DecodeError) -> Self {
+        UserError::InternalError(InternalError::Base64DecodeError(err))
     }
 }
