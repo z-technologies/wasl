@@ -1,6 +1,6 @@
 use crate::models::group::*;
 use crate::repos::{DbPool, DbPooledConnection, Repo, RepoTypes};
-use crate::result::{DataError, DataResult};
+use crate::result::{DataError, Result};
 
 use data_derive::Repository;
 use diesel::prelude::*;

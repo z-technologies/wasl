@@ -18,30 +18,30 @@ fn repo_impl(ast: &syn::DeriveInput) -> quote::Tokens {
 
     quote! {
         impl Repo for #name {
-            fn get_all(&self) -> DataResult<Vec<Self::Model>> {
+            fn get_all(&self) -> Result<Vec<Self::Model>> {
                 use crate::schema::#table_name::dsl::*;
                 Ok(#table_name.load::<Self::Model>(&self.get_connection()?)?)
             }
 
-            fn get(&self, key: crate::models::KeyType) -> DataResult<Self::Model> {
+            fn get(&self, key: crate::models::KeyType) -> Result<Self::Model> {
                 use crate::schema::#table_name::dsl::*;
                 Ok(#table_name.filter(id.eq(key)).get_result(&self.get_connection()?)?)
             }
 
-            fn insert<'a>(&self, item: &'a Self::InsertModel) -> DataResult<Self::Model> {
+            fn insert<'a>(&self, item: &'a Self::InsertModel) -> Result<Self::Model> {
                 use crate::schema::#table_name::dsl::*;
                 Ok(diesel::insert_into(#table_name)
                     .values(item)
                     .get_result::<Self::Model>(&self.get_connection()?)?)
             }
 
-            fn update<'a>(&self, item: &'a Self::Model) -> DataResult<&'a Self::Model> {
+            fn update<'a>(&self, item: &'a Self::Model) -> Result<&'a Self::Model> {
                 use crate::schema::#table_name::dsl::*;
                 diesel::update(#table_name).set(item).execute(&self.get_connection()?)?;
                 Ok(item)
             }
 
-            fn delete(&self, item: &Self::Model) -> DataResult<()> {
+            fn delete(&self, item: &Self::Model) -> Result<()> {
                 use crate::schema::#table_name::dsl::*;
                 match diesel::delete(#table_name
                                         .filter(id.eq(item.id)))
@@ -51,7 +51,7 @@ fn repo_impl(ast: &syn::DeriveInput) -> quote::Tokens {
                 }
             }
 
-            fn get_connection(&self) -> DataResult<DbPooledConnection> {
+            fn get_connection(&self) -> Result<DbPooledConnection> {
                 match self.pool.get() {
                     Ok(conn) => Ok(conn),
                     Err(err) => Err(DataError::ConnectionPoolError(format!("{}", err))),

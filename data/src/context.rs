@@ -1,5 +1,5 @@
 use crate::repos::{DbConnectionManager, DbPool, GroupsRepo, UsersRepo};
-use crate::result::{DataError, DataResult};
+use crate::result::{DataError, Result};
 
 #[derive(Clone)]
 pub struct DbContext {
@@ -27,7 +27,7 @@ impl DbContext {
 pub fn create_connection_pool(
     url: &str,
     max_connections: u32,
-) -> DataResult<DbPool> {
+) -> Result<DbPool> {
     let manager = DbConnectionManager::new(url);
 
     match DbPool::builder().max_size(max_connections).build(manager) {
