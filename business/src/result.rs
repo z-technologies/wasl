@@ -34,6 +34,12 @@ pub enum UserError {
 
     #[display(fmt = "invalid username or password")]
     InvalidUsernameOrPassword,
+
+    #[display(fmt = "username is already in use")]
+    UsernameAlreadyInUse,
+
+    #[display(fmt = "email is already in use")]
+    EmailAlreadyInUse,
 }
 
 impl error::Error for InternalError {}
