@@ -24,3 +24,15 @@ pub enum UserError {
 
 impl error::Error for InternalError {}
 impl error::Error for UserError {}
+
+impl From<DataError> for UserError {
+    fn from(err: DataError) -> Self {
+        UserError::InternalError(InternalError::DataError(err))
+    }
+}
+
+impl From<argon2::Error> for UserError {
+    fn from(err: argon2::Error) -> Self {
+        UserError::InternalError(InternalError::HashingError(err))
+    }
+}
