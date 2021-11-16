@@ -2,9 +2,15 @@
 extern crate quote;
 
 use proc_macro::TokenStream;
+use syn::Attribute;
 use syn::Ident;
+use syn::Lit;
+use syn::MetaItem;
 
-#[proc_macro_derive(Repository)]
+#[proc_macro_derive(
+    Repository,
+    attributes(repo_model, repo_insert_model, repo_table_name)
+)]
 pub fn repo(input: TokenStream) -> TokenStream {
     let ast = syn::parse_derive_input(&input.to_string()).unwrap();
     let gen = repo_impl(&ast);
@@ -14,10 +20,17 @@ pub fn repo(input: TokenStream) -> TokenStream {
 
 fn repo_impl(ast: &syn::DeriveInput) -> quote::Tokens {
     let name = &ast.ident;
-    let table_name = Ident::from(get_table_name(&name));
+    let attrs = &ast.attrs;
+
+    let table_name = get_attribute_value(&attrs, "repo_table_name");
+    let model_name = get_attribute_value(&attrs, "repo_model");
+    let insert_model_name = get_attribute_value(&attrs, "repo_insert_model");
 
     quote! {
-        impl Repo for #name {
+        impl crate::repos::Repo for #name {
+            type Model = #model_name;
+            type InsertModel = #insert_model_name;
+
             fn get_all(&self) -> Result<Vec<Self::Model>> {
                 use crate::schema::#table_name::dsl::*;
                 Ok(#table_name.load::<Self::Model>(&self.get_connection()?)?)
@@ -43,15 +56,14 @@ fn repo_impl(ast: &syn::DeriveInput) -> quote::Tokens {
 
             fn delete(&self, item: &Self::Model) -> Result<()> {
                 use crate::schema::#table_name::dsl::*;
-                match diesel::delete(#table_name
-                                        .filter(id.eq(item.id)))
-                                        .execute(&self.get_connection()?) {
+                match diesel::delete(#table_name.filter(id.eq(item.id)))
+                                           .execute(&self.get_connection()?) {
                     Ok(_) => Ok(()),
                     Err(err) => Err(DataError::from(err)),
                 }
             }
 
-            fn get_connection(&self) -> Result<DbPooledConnection> {
+            fn get_connection(&self) -> Result<crate::repos::DbPooledConnection> {
                 match self.pool.get() {
                     Ok(conn) => Ok(conn),
                     Err(err) => Err(DataError::ConnectionPoolError(format!("{}", err))),
@@ -61,15 +73,20 @@ fn repo_impl(ast: &syn::DeriveInput) -> quote::Tokens {
     }
 }
 
-fn get_table_name(name: &Ident) -> String {
-    let name = format!("{}", &name);
+fn get_attribute_value<'a>(attrs: &'a Vec<Attribute>, name: &'a str) -> Ident {
+    for attr in attrs {
+        if let MetaItem::NameValue(ident, lit) = &attr.value {
+            if ident != name {
+                continue;
+            }
 
-    if name.ends_with("Repo") {
-        name.strip_suffix("Repo").unwrap().to_owned()
-    } else if name.ends_with("Repository") {
-        name.strip_suffix("Repository").unwrap().to_owned()
-    } else {
-        name
+            if let Lit::Str(value, _) = lit {
+                return Ident::from(value.clone());
+            }
+
+            panic!("only string values are accepted");
+        }
     }
-    .to_lowercase()
+
+    panic!("attribute `{}' must be set", name);
 }
