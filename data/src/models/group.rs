@@ -1,11 +1,25 @@
+use crate::models::validate::RE_PACKAGE;
 use crate::models::KeyType;
 use crate::schema::groups;
 
 use serde::{Deserialize, Serialize};
+use validator::Validate;
 
-#[derive(Clone, Debug, Identifiable, Queryable, AsChangeset)]
+#[derive(
+    AsChangeset,
+    Clone,
+    Debug,
+    Deserialize,
+    Identifiable,
+    Queryable,
+    Serialize,
+    Validate,
+)]
 pub struct Group {
+    #[serde(skip)]
     pub id: KeyType,
+
+    #[validate(regex = "RE_PACKAGE")]
     pub name: String,
 }
 
