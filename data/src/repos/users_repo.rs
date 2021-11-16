@@ -1,5 +1,5 @@
 use crate::models::{Group, NewUser, User, UserGroup};
-use crate::repos::{DbPool, DbPooledConnection, Repo, RepoTypes};
+use crate::repos::{DbPool, Repo};
 use crate::result::{DataError, Result};
 
 use data_derive::Repository;
@@ -7,13 +7,11 @@ use diesel::dsl::any;
 use diesel::prelude::*;
 
 #[derive(Clone, Repository)]
+#[repo_table_name = "users"]
+#[repo_model = "User"]
+#[repo_insert_model = "NewUser"]
 pub struct UsersRepo {
     pub pool: DbPool,
-}
-
-impl RepoTypes for UsersRepo {
-    type Model = User;
-    type InsertModel = NewUser;
 }
 
 impl UsersRepo {
