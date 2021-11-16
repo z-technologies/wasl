@@ -7,6 +7,7 @@ extern crate jsonwebtoken;
 extern crate serde;
 extern crate validator;
 
+mod auth;
 mod handlers;
 mod result;
 mod setup;
