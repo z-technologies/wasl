@@ -1,3 +1,4 @@
+use crate::auth::token::Claims;
 use crate::result::Result;
 
 use business::services::auth::AuthSerivce;
@@ -12,13 +13,11 @@ pub async fn signin(
     auth: web::Data<AuthSerivce>,
     form: web::Json<SigninForm>,
 ) -> Result<HttpResponse> {
-    let user =
+    let (user, groups) =
         web::block(move || auth.signin(&form.username, &form.password)).await?;
 
-    // TODO:
-    // handle token creation
-
-    Ok(HttpResponse::Ok().json(user))
+    let token = Claims::for_user(&user, groups)?.encode()?;
+    Ok(HttpResponse::Ok().body(token))
 }
 
 #[post("/signup")]
