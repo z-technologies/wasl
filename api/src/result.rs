@@ -20,7 +20,7 @@ pub enum ApiError {
     ValidationError(ValidationErrors),
 }
 
-pub type ApiResult<T> = std::result::Result<T, ApiError>;
+pub type Result<T> = std::result::Result<T, ApiError>;
 
 impl ResponseError for ApiError {
     fn error_response(&self) -> HttpResponse {

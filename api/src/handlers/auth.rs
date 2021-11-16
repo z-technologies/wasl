@@ -1,4 +1,4 @@
-use crate::result::ApiResult;
+use crate::result::Result;
 
 use business::services::auth::AuthSerivce;
 use data::models::user::NewUser;
@@ -11,7 +11,7 @@ use validator::Validate;
 pub async fn signin(
     auth: web::Data<AuthSerivce>,
     form: web::Json<SigninForm>,
-) -> ApiResult<HttpResponse> {
+) -> Result<HttpResponse> {
     let user =
         web::block(move || auth.signin(&form.username, &form.password)).await?;
 
@@ -25,10 +25,14 @@ pub async fn signin(
 pub async fn signup(
     auth: web::Data<AuthSerivce>,
     form: web::Json<NewUser>,
-) -> ApiResult<HttpResponse> {
+) -> Result<HttpResponse> {
     form.validate()?;
 
     let user = web::block(move || auth.signup(&form)).await?;
+
+    // TODO:
+    // handle email verification
+
     Ok(HttpResponse::Created().json(user))
 }
 
