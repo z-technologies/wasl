@@ -2,7 +2,7 @@ use crate::result::{Result, UserError};
 use crate::security::password::is_match;
 
 use data::context::DbContext;
-use data::models::{NewUser, User};
+use data::models::{Group, NewUser, User};
 use data::repos::Repo;
 
 pub struct AuthSerivce {
@@ -14,12 +14,23 @@ impl AuthSerivce {
         &self,
         username: &'a str,
         password: &'a str,
-    ) -> Result<User> {
+    ) -> Result<(User, Vec<Group>)> {
         let user = self.ctx.users().get_by_username(username)?;
 
-        match user {
-            Some(user) => Ok(do_signin(user, password)?),
-            None => Err(UserError::InvalidUsernameOrPassword),
+        if let Some(user) = user {
+            if let Some(hash) = &user.password_hash {
+                let groups = self.ctx.users().get_user_groups(&user)?;
+
+                if is_match(password, &hash)? {
+                    Ok((user, groups))
+                } else {
+                    Err(UserError::InvalidUsernameOrPassword)
+                }
+            } else {
+                Err(UserError::PasswordNotSet)
+            }
+        } else {
+            Err(UserError::InvalidUsernameOrPassword)
         }
     }
 
@@ -38,18 +49,5 @@ impl AuthSerivce {
         // handle email verification
 
         Ok(user)
-    }
-}
-
-fn do_signin<'a>(user: User, password: &'a str) -> Result<User> {
-    match &user.password_hash {
-        Some(hash) => {
-            if is_match(password, &hash)? {
-                Ok(user)
-            } else {
-                Err(UserError::InvalidUsernameOrPassword)
-            }
-        }
-        None => Err(UserError::PasswordNotSet),
     }
 }
