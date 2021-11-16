@@ -13,6 +13,9 @@ pub enum ApiError {
     #[display(fmt = "user error: {}", _0)]
     UserError(UserError),
 
+    #[display(fmt = "jwt token error: {}", _0)]
+    TokenError(jsonwebtoken::errors::Error),
+
     #[display(fmt = "scheduling error")]
     SechulingError,
 
@@ -33,10 +36,11 @@ impl ResponseError for ApiError {
 
     fn status_code(&self) -> StatusCode {
         match self {
-            ApiError::InternalError(_) | ApiError::SechulingError => {
+            ApiError::InternalError(..) | ApiError::SechulingError => {
                 StatusCode::INTERNAL_SERVER_ERROR
             }
 
+            ApiError::TokenError(..) => StatusCode::UNAUTHORIZED,
             ApiError::ValidationError { .. } => StatusCode::BAD_REQUEST,
 
             ApiError::UserError(err) => match err {
