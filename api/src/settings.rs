@@ -8,19 +8,19 @@ use serde::Deserialize;
 use std::env;
 
 #[derive(Debug, Deserialize)]
-pub struct Server {
+pub struct ServerSettings {
     pub address: String,
     pub port: u16,
 }
 
-impl Server {
+impl ServerSettings {
     pub fn endpoint(&self) -> String {
         format!("{}:{}", self.address, self.port)
     }
 }
 
 #[derive(Debug, Deserialize)]
-pub struct Database {
+pub struct DatabaseSettings {
     pub backend: String,
     pub address: String,
     pub username: String,
@@ -28,7 +28,7 @@ pub struct Database {
     pub database: String,
 }
 
-impl Database {
+impl DatabaseSettings {
     pub fn url(&self) -> String {
         format!(
             "{}://{}:{}@{}/{}",
@@ -42,13 +42,13 @@ impl Database {
 }
 
 #[derive(Debug, Deserialize)]
-pub struct Security {
+pub struct SecuritySettings {
     pub private_key_path: String,
     pub public_key_path: String,
     pub token_expiration_seconds: i64,
 }
 
-impl Security {
+impl SecuritySettings {
     pub fn public_key(&self) -> Result<Vec<u8>> {
         Ok(io::load_file_bytes(&self.public_key_path)?)
     }
@@ -60,9 +60,9 @@ impl Security {
 
 #[derive(Debug, Deserialize)]
 pub struct Settings {
-    pub server: Server,
-    pub database: Database,
-    pub security: Security,
+    pub server: ServerSettings,
+    pub database: DatabaseSettings,
+    pub security: SecuritySettings,
 }
 
 impl Settings {
