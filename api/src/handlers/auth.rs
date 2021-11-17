@@ -39,15 +39,15 @@ pub async fn signup(
     Ok(HttpResponse::Created().json(user))
 }
 
-#[put("/set-password")]
-pub async fn set_password(
+#[put("/set-initial-password")]
+pub async fn set_initial_password(
     auth: web::Data<AuthSerivce>,
     form: web::Json<UpdatePasswordForm>,
 ) -> Result<HttpResponse> {
     form.validate()?;
 
     web::block(move || {
-        auth.set_password(&form.username, &form.password, &form.token)
+        auth.set_initial_password(&form.username, &form.password, &form.token)
     })
     .await?;
 
