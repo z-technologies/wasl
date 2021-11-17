@@ -6,10 +6,14 @@ use data::models::{Group, NewUser, User};
 use data::repos::Repo;
 
 pub struct AuthSerivce {
-    pub ctx: DbContext,
+    ctx: DbContext,
 }
 
 impl AuthSerivce {
+    pub fn new(ctx: DbContext) -> AuthSerivce {
+        AuthSerivce { ctx }
+    }
+
     pub fn signin<'a>(
         &self,
         username: &'a str,
