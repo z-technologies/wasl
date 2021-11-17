@@ -11,3 +11,6 @@ Cargo.lock
 
 # dotenv file. This file SHOULD NEVER make it to the remote repository
 .env
+
+# config files
+/config/
