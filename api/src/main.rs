@@ -14,22 +14,37 @@ mod result;
 mod settings;
 mod setup;
 
+use crate::settings::Settings;
+use business::services::AuthSerivce;
+
+use data::context::{create_connection_pool, DbContext};
+
 use actix_web::{App, HttpServer};
-use dotenv::dotenv;
-use std::env;
+use std::sync::Arc;
+
+const MAX_POOL_CONNECTIONS: u32 = 4;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    dotenv().ok();
+    setup::setup_logging();
 
-    std::env::set_var("RUST_LOG", "debug");
-    std::env::set_var("RUST_BACKTRACE", "1");
-    env_logger::init();
+    let settings: Arc<Settings> = Arc::new(Settings::new().unwrap());
 
-    let listen_ep = env::var("LISTEN_ENDPOINT").expect("listen address");
+    let listen_ep = settings.server.endpoint();
+    let db_url = settings.database.url();
+    let db_pool = create_connection_pool(&db_url, MAX_POOL_CONNECTIONS)
+        .expect("could not create a database pool");
 
-    HttpServer::new(|| App::new().configure(setup::setup_webserver))
-        .bind(listen_ep)?
-        .run()
-        .await
+    let ctx = DbContext::new(db_pool);
+
+    HttpServer::new(move || {
+        App::new()
+            .data(settings.clone())
+            .data(ctx.clone())
+            .data(AuthSerivce { ctx: ctx.clone() })
+            .configure(setup::setup_handlers)
+    })
+    .bind(listen_ep)?
+    .run()
+    .await
 }
