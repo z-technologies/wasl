@@ -1,7 +1,5 @@
 use crate::result::Result;
 
-use business::config::get_environment_value;
-use business::security::crypto::asymmetric::load_file_bytes;
 use data::models::{Group, User};
 
 use jsonwebtoken::{Algorithm, DecodingKey, EncodingKey, Header, Validation};
@@ -15,39 +13,31 @@ pub struct Claims {
 }
 
 impl Claims {
-    pub fn for_user(user: &User, groups: Vec<Group>) -> Result<Claims> {
-        let token_validity: i64 =
-            get_environment_value("AUTH_TOKEN_EXP_SECONDS")?
-                .parse()
-                .expect("invalid token validity seconds value");
-
+    pub fn for_user(
+        user: &User,
+        groups: Vec<Group>,
+        valid_for: i64,
+    ) -> Result<Claims> {
         Ok(Claims {
             sub: user.username.clone(),
             aud: groups,
-            exp: (chrono::Utc::now()
-                + chrono::Duration::seconds(token_validity))
-            .timestamp() as usize,
+            exp: (chrono::Utc::now() + chrono::Duration::seconds(valid_for))
+                .timestamp() as usize,
         })
     }
 
-    pub fn encode(&self) -> Result<String> {
-        let private_key =
-            load_file_bytes(&get_environment_value("SECURITY_PRIVATE_KEY")?)?;
-
+    pub fn encode(&self, pk: &Vec<u8>) -> Result<String> {
         Ok(jsonwebtoken::encode(
             &Header::new(Algorithm::ES256),
             &self,
-            &EncodingKey::from_ec_pem(&private_key)?,
+            &EncodingKey::from_ec_pem(pk)?,
         )?)
     }
 
-    pub fn decode(token: &str) -> Result<Claims> {
-        let private_key =
-            load_file_bytes(&get_environment_value("SECURITY_PRIVATE_KEY")?)?;
-
+    pub fn decode(token: &str, pk: &Vec<u8>) -> Result<Claims> {
         Ok(jsonwebtoken::decode::<Claims>(
             token,
-            &DecodingKey::from_ec_pem(&private_key)?,
+            &DecodingKey::from_ec_pem(&pk)?,
             &Validation::default(),
         )?
         .claims)
