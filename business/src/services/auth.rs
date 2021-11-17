@@ -51,7 +51,7 @@ impl AuthSerivce {
         Ok(user)
     }
 
-    pub fn set_password<'a>(
+    pub fn set_initial_password<'a>(
         &self,
         username: &'a str,
         password: &'a str,
@@ -63,11 +63,13 @@ impl AuthSerivce {
         let user = self.ctx.users().get_by_username(username)?;
 
         if let Some(mut user) = user {
-            println!("{:?}", user);
-            user.password_hash = Some(make_hash(password)?);
-            println!("{:?}", user);
-            self.ctx.users().update(&user)?;
-            Ok(())
+            if user.is_active {
+                Err(UserError::CouldNotUpdateAccount)
+            } else {
+                user.password_hash = Some(make_hash(password)?);
+                self.ctx.users().update(&user)?;
+                Ok(())
+            }
         } else {
             Err(UserError::NotFound)
         }
