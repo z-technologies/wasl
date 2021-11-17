@@ -15,46 +15,27 @@ mod setup;
 
 use crate::settings::Settings;
 
-use business::services::{AuthSerivce, EmailService};
-use data::context::{create_connection_pool, DbContext};
-
+use actix_web::middleware;
 use actix_web::{App, HttpServer};
-use std::sync::Arc;
 
-const MAX_POOL_CONNECTIONS: u32 = 4;
+use std::sync::Arc;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     setup::setup_logging();
 
-    let settings: Arc<Settings> = Arc::new(Settings::new().unwrap());
-
-    let ctx = create_db_ctx(&settings);
+    let settings = Arc::new(Settings::new().unwrap());
     let listen_ep = settings.server.endpoint();
 
     HttpServer::new(move || {
         App::new()
-            .data(settings.clone())
-            .data(ctx.clone())
-            .data(AuthSerivce::new(ctx.clone()))
-            .data(EmailService::new(
-                &settings.email.smtp_host,
-                settings.email.smtp_port,
-                &settings.email.smtp_username,
-                &settings.email.smtp_password,
-                settings.email.require_tls,
-            ))
+            .wrap(middleware::Logger::default())
             .configure(setup::setup_handlers)
+            .configure(|mut _cfg| {
+                setup::setup_data(&mut _cfg, settings.clone())
+            })
     })
     .bind(listen_ep)?
     .run()
     .await
-}
-
-fn create_db_ctx(settings: &Settings) -> DbContext {
-    let db_url = settings.database.url();
-    let db_pool = create_connection_pool(&db_url, MAX_POOL_CONNECTIONS)
-        .expect("could not create a database pool");
-
-    DbContext::new(db_pool)
 }
