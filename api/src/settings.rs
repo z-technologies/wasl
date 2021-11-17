@@ -4,28 +4,28 @@ use serde::Deserialize;
 use std::env;
 
 #[derive(Debug, Deserialize)]
-struct Server {
-    address: String,
-    port: u16,
+pub struct Server {
+    pub address: String,
+    pub port: u16,
 }
 
 impl Server {
-    fn endpoint(&self) -> String {
+    pub fn endpoint(&self) -> String {
         format!("{}:{}", self.address, self.port)
     }
 }
 
 #[derive(Debug, Deserialize)]
-struct Database {
-    backend: String,
-    address: String,
-    username: String,
-    password: String,
-    database: String,
+pub struct Database {
+    pub backend: String,
+    pub address: String,
+    pub username: String,
+    pub password: String,
+    pub database: String,
 }
 
 impl Database {
-    fn url(&self) -> String {
+    pub fn url(&self) -> String {
         format!(
             "{}://{}:{}@{}/{}",
             self.backend,
@@ -38,17 +38,17 @@ impl Database {
 }
 
 #[derive(Debug, Deserialize)]
-struct Security {
-    private_key: String,
-    public_key: String,
-    token_expiration_seconds: u64,
+pub struct Security {
+    pub private_key: String,
+    pub public_key: String,
+    pub token_expiration_seconds: u64,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct Settings {
-    server: Server,
-    database: Database,
-    security: Security,
+    pub server: Server,
+    pub database: Database,
+    pub security: Security,
 }
 
 impl Settings {
