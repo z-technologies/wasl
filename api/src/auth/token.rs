@@ -4,7 +4,7 @@ use business::config::get_environment_value;
 use business::security::crypto::asymmetric::load_file_bytes;
 use data::models::{Group, User};
 
-use jsonwebtoken::{DecodingKey, EncodingKey, Header, Validation};
+use jsonwebtoken::{Algorithm, DecodingKey, EncodingKey, Header, Validation};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -32,10 +32,10 @@ impl Claims {
 
     pub fn encode(&self) -> Result<String> {
         let private_key =
-            load_file_bytes(&get_environment_value("AUTH_PRIVATE_KEY")?)?;
+            load_file_bytes(&get_environment_value("SECURITY_PRIVATE_KEY")?)?;
 
         Ok(jsonwebtoken::encode(
-            &Header::default(),
+            &Header::new(Algorithm::ES256),
             &self,
             &EncodingKey::from_ec_pem(&private_key)?,
         )?)
@@ -43,7 +43,7 @@ impl Claims {
 
     pub fn decode(token: &str) -> Result<Claims> {
         let private_key =
-            load_file_bytes(&get_environment_value("AUTH_PRIVATE_KEY")?)?;
+            load_file_bytes(&get_environment_value("SECURITY_PRIVATE_KEY")?)?;
 
         Ok(jsonwebtoken::decode::<Claims>(
             token,
