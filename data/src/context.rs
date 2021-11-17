@@ -1,22 +1,28 @@
-use crate::repos::{DbConnectionManager, DbPool, GroupsRepo, UsersRepo};
+use crate::repos::*;
 use crate::result::{DataError, Result};
 
 #[derive(Clone)]
 pub struct DbContext {
     users: UsersRepo,
     groups: GroupsRepo,
+    confirmations: ConfirmationsRepo,
 }
 
 impl DbContext {
     pub fn new(pool: DbPool) -> DbContext {
         DbContext {
             users: UsersRepo { pool: pool.clone() },
+            confirmations: ConfirmationsRepo { pool: pool.clone() },
             groups: GroupsRepo { pool },
         }
     }
 
     pub fn users(&self) -> &UsersRepo {
         &self.users
+    }
+
+    pub fn confirmations(&self) -> &ConfirmationsRepo {
+        &self.confirmations
     }
 
     pub fn groups(&self) -> &GroupsRepo {
