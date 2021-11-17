@@ -39,8 +39,8 @@ impl Database {
 
 #[derive(Debug, Deserialize)]
 pub struct Security {
-    pub private_key: String,
-    pub public_key: String,
+    pub private_key_path: String,
+    pub public_key_path: String,
     pub token_expiration_seconds: i64,
 }
 
