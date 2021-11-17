@@ -32,6 +32,9 @@ pub enum UserError {
     #[display(fmt = "internal error: {}", _0)]
     InternalError(InternalError),
 
+    #[display(fmt = "not found")]
+    NotFound,
+
     #[display(fmt = "password not set")]
     PasswordNotSet,
 
