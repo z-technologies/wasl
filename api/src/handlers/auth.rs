@@ -2,9 +2,11 @@ use crate::auth::token::Claims;
 use crate::result::Result;
 
 use business::services::auth::AuthSerivce;
+use data::context::DbContext;
 use data::models::user::NewUser;
+use data::models::validate::RE_USERNAME;
 
-use actix_web::{post, web, HttpResponse};
+use actix_web::{post, put, web, HttpResponse};
 use serde::Deserialize;
 use validator::Validate;
 
@@ -13,6 +15,8 @@ pub async fn signin(
     auth: web::Data<AuthSerivce>,
     form: web::Json<SigninForm>,
 ) -> Result<HttpResponse> {
+    form.validate()?;
+
     let (user, groups) =
         web::block(move || auth.signin(&form.username, &form.password)).await?;
 
@@ -35,8 +39,33 @@ pub async fn signup(
     Ok(HttpResponse::Created().json(user))
 }
 
-#[derive(Deserialize)]
+#[put("/set-password")]
+pub async fn set_password(
+    auth: web::Data<AuthSerivce>,
+    form: web::Json<UpdatePasswordForm>,
+) -> Result<HttpResponse> {
+    form.validate()?;
+
+    web::block(move || {
+        auth.set_password(&form.username, &form.password, &form.token)
+    })
+    .await?;
+
+    Ok(HttpResponse::Accepted().finish())
+}
+
+#[derive(Deserialize, Validate)]
 pub struct SigninForm {
+    #[validate(regex = "RE_USERNAME")]
     username: String,
     password: String,
+}
+
+#[derive(Deserialize, Validate)]
+pub struct UpdatePasswordForm {
+    #[validate(regex = "RE_USERNAME")]
+    username: String,
+    #[validate(length(min = 6, max = 32))]
+    password: String,
+    token: String,
 }
