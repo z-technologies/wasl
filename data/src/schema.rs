@@ -1,4 +1,15 @@
 table! {
+    confirmations (id) {
+        id -> Int4,
+        user_id -> Int4,
+        otp -> Varchar,
+        token -> Varchar,
+        issued_at -> Timestamptz,
+        expires_at -> Timestamptz,
+    }
+}
+
+table! {
     groups (id) {
         id -> Int4,
         name -> Varchar,
@@ -28,10 +39,12 @@ table! {
     }
 }
 
+joinable!(confirmations -> users (user_id));
 joinable!(user_groups -> groups (group_id));
 joinable!(user_groups -> users (user_id));
 
 allow_tables_to_appear_in_same_query!(
+    confirmations,
     groups,
     user_groups,
     users,
