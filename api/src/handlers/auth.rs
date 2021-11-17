@@ -1,8 +1,8 @@
 use crate::auth::token::Claims;
 use crate::result::Result;
+use crate::settings::Settings;
 
 use business::services::auth::AuthSerivce;
-use data::context::DbContext;
 use data::models::user::NewUser;
 use data::models::validate::RE_USERNAME;
 
@@ -12,15 +12,22 @@ use validator::Validate;
 
 #[post("/signin")]
 pub async fn signin(
-    auth: web::Data<AuthSerivce>,
     form: web::Json<SigninForm>,
+    auth: web::Data<AuthSerivce>,
+    settings: web::Data<Settings>,
 ) -> Result<HttpResponse> {
     form.validate()?;
 
     let (user, groups) =
         web::block(move || auth.signin(&form.username, &form.password)).await?;
 
-    let token = Claims::for_user(&user, groups)?.encode()?;
+    let token = Claims::for_user(
+        &user,
+        groups,
+        settings.security.token_expiration_seconds,
+    )?
+    .encode(&settings.security.private_key()?)?;
+
     Ok(HttpResponse::Ok().body(token))
 }
 
