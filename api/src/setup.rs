@@ -1,5 +1,6 @@
 use crate::handlers::auth;
 use crate::handlers::echo;
+use crate::settings::Settings;
 
 use business::services::auth::AuthSerivce;
 
@@ -9,6 +10,8 @@ use std::env;
 const MAX_POOL_CONNECTIONS: u32 = 4;
 
 pub fn setup_webserver(cfg: &mut web::ServiceConfig) {
+    let settings = Settings::new().unwrap();
+
     let db_url = env::var("DB_URL").expect("database url");
     let db_pool =
         data::context::create_connection_pool(&db_url, MAX_POOL_CONNECTIONS)
@@ -26,6 +29,7 @@ pub fn setup_webserver(cfg: &mut web::ServiceConfig) {
                     .service(auth::set_initial_password),
             )
     })
+    .data(settings)
     .data(ctx.clone())
     .data(AuthSerivce { ctx });
 }
