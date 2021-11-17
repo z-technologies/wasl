@@ -7,6 +7,18 @@ use derive_more::{Display, From};
 pub type Result<T> = std::result::Result<T, UserError>;
 
 #[derive(Debug, Display, From)]
+pub enum EmailError {
+    #[display(fmt = "general error: {}", _0)]
+    GeneralError(lettre::error::Error),
+
+    #[display(fmt = "transport error: {}", _0)]
+    TransportError(lettre::transport::smtp::Error),
+
+    #[display(fmt = "address error: {}", _0)]
+    AddressError(lettre::address::AddressError),
+}
+
+#[derive(Debug, Display, From)]
 pub enum InternalError {
     #[display(fmt = "io error: {}", _0)]
     IoError(std::io::Error),
@@ -25,6 +37,12 @@ pub enum InternalError {
 
     #[display(fmt = "base64 decode error: {}", _0)]
     Base64DecodeError(base64::DecodeError),
+
+    #[display(fmt = "email error: {}", _0)]
+    EmailError(EmailError),
+
+    #[display(fmt = "tls error: {}", _0)]
+    TlsError(native_tls::Error),
 }
 
 #[derive(Debug, Display, From)]
@@ -87,5 +105,35 @@ impl From<std::str::Utf8Error> for UserError {
 impl From<base64::DecodeError> for UserError {
     fn from(err: base64::DecodeError) -> Self {
         UserError::InternalError(InternalError::Base64DecodeError(err))
+    }
+}
+
+impl From<lettre::error::Error> for UserError {
+    fn from(err: lettre::error::Error) -> Self {
+        UserError::InternalError(InternalError::EmailError(
+            EmailError::GeneralError(err),
+        ))
+    }
+}
+
+impl From<lettre::transport::smtp::Error> for UserError {
+    fn from(err: lettre::transport::smtp::Error) -> Self {
+        UserError::InternalError(InternalError::EmailError(
+            EmailError::TransportError(err),
+        ))
+    }
+}
+
+impl From<lettre::address::AddressError> for UserError {
+    fn from(err: lettre::address::AddressError) -> Self {
+        UserError::InternalError(InternalError::EmailError(
+            EmailError::AddressError(err),
+        ))
+    }
+}
+
+impl From<native_tls::Error> for UserError {
+    fn from(err: native_tls::Error) -> Self {
+        UserError::InternalError(InternalError::TlsError(err))
     }
 }
