@@ -50,7 +50,8 @@ fn repo_impl(ast: &syn::DeriveInput) -> quote::Tokens {
 
             fn update<'a>(&self, item: &'a Self::Model) -> Result<&'a Self::Model> {
                 use crate::schema::#table_name::dsl::*;
-                diesel::update(#table_name).set(item).execute(&self.get_connection()?)?;
+                diesel::update(#table_name.filter(id.eq(item.id)))
+                    .set(item).execute(&self.get_connection()?)?;
                 Ok(item)
             }
 
