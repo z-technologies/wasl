@@ -41,7 +41,7 @@ impl Database {
 pub struct Security {
     pub private_key: String,
     pub public_key: String,
-    pub token_expiration_seconds: u64,
+    pub token_expiration_seconds: i64,
 }
 
 #[derive(Debug, Deserialize)]
