@@ -1,5 +1,6 @@
 use business::result::{InternalError, UserError};
 
+use actix_web::error::BlockingError;
 use actix_web::http::StatusCode;
 use actix_web::{HttpResponse, ResponseError};
 use derive_more::{Display, From};
@@ -13,11 +14,11 @@ pub enum ApiError {
     #[display(fmt = "user error: {}", _0)]
     UserError(UserError),
 
-    #[display(fmt = "jwt token error: {}", _0)]
-    TokenError(jsonwebtoken::errors::Error),
-
     #[display(fmt = "scheduling error")]
     SechulingError,
+
+    #[display(fmt = "jwt token error: {}", _0)]
+    TokenError(jsonwebtoken::errors::Error),
 
     #[display(fmt = "validation error on field(s): {}", _0)]
     ValidationError(ValidationErrors),
@@ -47,6 +48,7 @@ impl ResponseError for ApiError {
                 UserError::InternalError(..) => {
                     StatusCode::INTERNAL_SERVER_ERROR
                 }
+                UserError::NotFound => StatusCode::NOT_FOUND,
                 UserError::PasswordNotSet => StatusCode::FORBIDDEN,
                 UserError::InvalidUsernameOrPassword => {
                     StatusCode::UNAUTHORIZED
@@ -58,8 +60,11 @@ impl ResponseError for ApiError {
     }
 }
 
-impl<E: std::fmt::Debug> From<actix_web::error::BlockingError<E>> for ApiError {
-    fn from(_: actix_web::error::BlockingError<E>) -> Self {
-        ApiError::SechulingError
+impl From<BlockingError<UserError>> for ApiError {
+    fn from(err: BlockingError<UserError>) -> Self {
+        match err {
+            BlockingError::Error(err) => ApiError::UserError(err),
+            BlockingError::Canceled => ApiError::SechulingError,
+        }
     }
 }
