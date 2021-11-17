@@ -35,6 +35,9 @@ pub enum UserError {
     #[display(fmt = "not found")]
     NotFound,
 
+    #[display(fmt = "could not update account info")]
+    CouldNotUpdateAccount,
+
     #[display(fmt = "password not set")]
     PasswordNotSet,
 
