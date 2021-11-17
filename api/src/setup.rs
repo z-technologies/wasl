@@ -2,7 +2,6 @@ use crate::handlers::auth;
 use crate::handlers::echo;
 
 use actix_web::web;
-use dotenv::dotenv;
 
 use std::env;
 
@@ -20,7 +19,6 @@ pub fn setup_handlers(cfg: &mut web::ServiceConfig) {
 }
 
 pub fn setup_logging() {
-    dotenv().ok();
     env::set_var("RUST_LOG", "debug");
     env::set_var("RUST_BACKTRACE", "1");
     env_logger::init();

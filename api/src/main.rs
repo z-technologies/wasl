@@ -2,7 +2,6 @@ extern crate actix_web;
 extern crate chrono;
 extern crate config;
 extern crate derive_more;
-extern crate dotenv;
 extern crate env_logger;
 extern crate jsonwebtoken;
 extern crate serde;
