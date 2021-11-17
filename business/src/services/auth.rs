@@ -1,5 +1,5 @@
 use crate::result::{Result, UserError};
-use crate::security::password::is_match;
+use crate::security::password::{is_match, make_hash};
 
 use data::context::DbContext;
 use data::models::{Group, NewUser, User};
@@ -49,5 +49,27 @@ impl AuthSerivce {
         // handle email verification
 
         Ok(user)
+    }
+
+    pub fn set_password<'a>(
+        &self,
+        username: &'a str,
+        password: &'a str,
+        _token: &'a str,
+    ) -> Result<()> {
+        // TODO:
+        // validate token
+
+        let user = self.ctx.users().get_by_username(username)?;
+
+        if let Some(mut user) = user {
+            println!("{:?}", user);
+            user.password_hash = Some(make_hash(password)?);
+            println!("{:?}", user);
+            self.ctx.users().update(&user)?;
+            Ok(())
+        } else {
+            Err(UserError::NotFound)
+        }
     }
 }
