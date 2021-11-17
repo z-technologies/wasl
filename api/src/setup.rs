@@ -22,7 +22,8 @@ pub fn setup_webserver(cfg: &mut web::ServiceConfig) {
             .service(
                 web::scope("/auth")
                     .service(auth::signin)
-                    .service(auth::signup),
+                    .service(auth::signup)
+                    .service(auth::set_password),
             )
     })
     .data(ctx.clone())
