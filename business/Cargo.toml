@@ -8,5 +8,8 @@ data = { path = "../data" }
 
 base64      = "0.13.0"
 derive_more = "0.99"
+lettre      = "0.10.0-rc.4"
+native-tls  = "0.2"
 rand        = "0.8"
 rust-argon2 = "0.8.3"
+serde       = { version = "1.0", features = ["derive"] }
