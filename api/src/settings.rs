@@ -59,10 +59,22 @@ impl SecuritySettings {
 }
 
 #[derive(Debug, Deserialize)]
+pub struct EmailSettings {
+    pub smtp_host: String,
+    pub smtp_port: u16,
+    pub smtp_username: String,
+    pub smtp_password: String,
+
+    pub noreply_address: String,
+    pub require_tls: bool,
+}
+
+#[derive(Debug, Deserialize)]
 pub struct Settings {
     pub server: ServerSettings,
     pub database: DatabaseSettings,
     pub security: SecuritySettings,
+    pub email: EmailSettings,
 }
 
 impl Settings {
