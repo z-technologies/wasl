@@ -1,3 +1,7 @@
+use crate::result::Result;
+
+use business::io;
+
 use config::{Config, ConfigError, Environment, File};
 use serde::Deserialize;
 
@@ -44,6 +48,16 @@ pub struct Security {
     pub token_expiration_seconds: i64,
 }
 
+impl Security {
+    pub fn public_key(&self) -> Result<Vec<u8>> {
+        Ok(io::load_file_bytes(&self.public_key_path)?)
+    }
+
+    pub fn private_key(&self) -> Result<Vec<u8>> {
+        Ok(io::load_file_bytes(&self.private_key_path)?)
+    }
+}
+
 #[derive(Debug, Deserialize)]
 pub struct Settings {
     pub server: Server,
@@ -52,7 +66,7 @@ pub struct Settings {
 }
 
 impl Settings {
-    pub fn new() -> Result<Self, ConfigError> {
+    pub fn new() -> std::result::Result<Self, ConfigError> {
         let mut s = Config::default();
 
         let prefix =
