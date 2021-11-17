@@ -45,7 +45,8 @@ impl ResponseError for ApiError {
             ApiError::ValidationError { .. } => StatusCode::BAD_REQUEST,
 
             ApiError::UserError(err) => match err {
-                UserError::InternalError(..) => {
+                UserError::InternalError(..)
+                | UserError::CouldNotUpdateAccount => {
                     StatusCode::INTERNAL_SERVER_ERROR
                 }
                 UserError::NotFound => StatusCode::NOT_FOUND,
