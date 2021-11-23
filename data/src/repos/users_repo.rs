@@ -15,7 +15,7 @@ pub struct UsersRepo {
 }
 
 impl UsersRepo {
-    pub fn get_by_username<'a>(&self, uname: &'a str) -> Result<Option<User>> {
+    pub fn get_by_username(&self, uname: &str) -> Result<Option<User>> {
         use crate::schema::users::dsl::*;
 
         Ok(users
@@ -24,7 +24,7 @@ impl UsersRepo {
             .optional()?)
     }
 
-    pub fn get_by_email<'a>(&self, em: &'a str) -> Result<Option<User>> {
+    pub fn get_by_email(&self, em: &str) -> Result<Option<User>> {
         use crate::schema::users::dsl::*;
 
         Ok(users
@@ -33,7 +33,7 @@ impl UsersRepo {
             .optional()?)
     }
 
-    pub fn duplicate_username<'a>(&self, uname: &'a str) -> Result<bool> {
+    pub fn duplicate_username(&self, uname: &str) -> Result<bool> {
         use crate::schema::users::dsl::*;
         use diesel::dsl::*;
 
@@ -41,7 +41,7 @@ impl UsersRepo {
             .get_result(&self.get_connection()?)?)
     }
 
-    pub fn duplicate_email<'a>(&self, em: &'a str) -> Result<bool> {
+    pub fn duplicate_email(&self, em: &str) -> Result<bool> {
         use crate::schema::users::dsl::*;
         use diesel::dsl::*;
 
