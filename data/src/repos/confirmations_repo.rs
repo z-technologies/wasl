@@ -1,5 +1,5 @@
 use crate::models::confirmation::*;
-use crate::repos::DbPool;
+use crate::repos::{DbPool, Repo};
 use crate::result::{DataError, Result};
 
 use data_derive::Repository;
@@ -11,4 +11,15 @@ use diesel::prelude::*;
 #[repo_insert_model = "NewConfirmation"]
 pub struct ConfirmationsRepo {
     pub pool: DbPool,
+}
+
+impl ConfirmationsRepo {
+    pub fn get_by_token(&self, t: &str) -> Result<Option<Confirmation>> {
+        use crate::schema::confirmations::dsl::*;
+
+        Ok(confirmations
+            .filter(token.eq(t))
+            .first::<Confirmation>(&self.get_connection()?)
+            .optional()?)
+    }
 }
