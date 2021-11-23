@@ -22,4 +22,13 @@ impl ConfirmationsRepo {
             .first::<Confirmation>(&self.get_connection()?)
             .optional()?)
     }
+
+    pub fn get_by_otp(&self, o: &str) -> Result<Option<Confirmation>> {
+        use crate::schema::confirmations::dsl::*;
+
+        Ok(confirmations
+            .filter(otp.eq(o))
+            .first::<Confirmation>(&self.get_connection()?)
+            .optional()?)
+    }
 }
