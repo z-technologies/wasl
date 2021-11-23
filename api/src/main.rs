@@ -31,9 +31,7 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .wrap(middleware::Logger::default())
             .configure(setup::setup_handlers)
-            .configure(|mut _cfg| {
-                setup::setup_data(&mut _cfg, settings.clone())
-            })
+            .configure(|cfg| setup::setup_data(cfg, settings.clone()))
     })
     .bind(listen_ep)?
     .run()
