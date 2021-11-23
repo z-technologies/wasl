@@ -53,9 +53,14 @@ impl AuthSerivce {
         }
 
         let user = self.ctx.users().insert(&new_user)?;
-        self.send_verification_email(&user)?;
 
-        Ok(user)
+        match self.send_verification_email(&user) {
+            Ok(..) => Ok(user),
+            Err(err) => {
+                self.ctx.users().delete(&user)?;
+                Err(err)
+            }
+        }
     }
 
     pub fn activate_with_token(
