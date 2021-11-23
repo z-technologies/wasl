@@ -1,7 +1,6 @@
 use crate::models::{KeyType, User};
 use crate::schema::confirmations;
 
-use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
 use validator::Validate;
 
@@ -23,8 +22,8 @@ pub struct Confirmation {
     pub user_id: KeyType,
     pub otp: String,
     pub token: String,
-    pub issued_at: NaiveDateTime,
-    pub expires_at: NaiveDateTime,
+    pub issued_at: chrono::DateTime<chrono::Utc>,
+    pub expires_at: chrono::DateTime<chrono::Utc>,
 }
 
 #[derive(Debug, Insertable, Serialize, Deserialize, Validate)]
@@ -33,5 +32,6 @@ pub struct NewConfirmation {
     pub user_id: KeyType,
     pub otp: String,
     pub token: String,
-    pub expires_at: NaiveDateTime,
+    pub issued_at: chrono::DateTime<chrono::Utc>,
+    pub expires_at: chrono::DateTime<chrono::Utc>,
 }
