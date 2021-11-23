@@ -88,7 +88,7 @@ impl AuthSerivce {
 
         let ret = self.email_svc.send_noreply(
             "Account Confirmation",
-            &build_confirmation_email(user, &conf),
+            build_confirmation_email(user, &conf),
             make_mail_box(&user.username, &user.email)?,
         );
 
@@ -108,7 +108,7 @@ impl AuthSerivce {
         let conf = NewConfirmation {
             user_id: user.id,
             otp: generate_alphanum_string::<8>(),
-            token: generate_alphanum_string::<32>(),
+            token: generate_alphanum_string::<64>(),
             issued_at: chrono::Utc::now(),
             expires_at: chrono::Utc::now() + valid_for,
         };
@@ -118,18 +118,24 @@ impl AuthSerivce {
 }
 
 fn build_confirmation_email(user: &User, conf: &Confirmation) -> String {
-    format!(
+    let html = format!(
         r#"
-          Hello, {username}!
+<p>
+    Hello, <b>{username}</b>!
+</p>
 
-          Your activation code is: {otp}
-          Activate directly: http://localhost:8080/api/v1/auth/activate/{token}
-
-          This link expires on {expires}.
+<p style="line-height: 2em">
+	Your activation code is: <b style="color:#414141; background-color: #efefef; padding: 8px 16px">{otp}</b><br>
+	Activate directly <a href="http://localhost:8080/api/v1/auth/activate/{token}">from here</a> <br>
+</p>
+  
+<footer>This email expires on <b>{expires}.</footer>
         "#,
         username = user.username,
         otp = conf.otp,
         token = conf.token,
         expires = conf.expires_at
-    )
+    );
+
+    html
 }
