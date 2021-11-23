@@ -56,9 +56,6 @@ pub enum UserError {
     #[display(fmt = "could not update account info")]
     CouldNotUpdateAccount,
 
-    #[display(fmt = "password not set")]
-    PasswordNotSet,
-
     #[display(fmt = "invalid username or password")]
     InvalidUsernameOrPassword,
 
