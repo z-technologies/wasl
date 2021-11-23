@@ -1,6 +1,6 @@
 use crate::result::Result;
 
-use lettre::message::Mailbox;
+use lettre::message::{Mailbox, SinglePart};
 use lettre::transport::smtp::client::{Tls, TlsParameters};
 use lettre::transport::smtp::response::Response;
 use lettre::{Message, SmtpTransport, Transport};
@@ -34,10 +34,10 @@ impl EmailService {
         })
     }
 
-    pub fn send<'a>(
+    pub fn send(
         &self,
-        subject: &'a str,
-        body: &'a str,
+        subject: &str,
+        body: String,
         from: Mailbox,
         to: Mailbox,
     ) -> Result<Response> {
@@ -46,22 +46,22 @@ impl EmailService {
             .to(to)
             .subject(subject)
             .date_now()
-            .body(body.to_owned())?;
+            .singlepart(SinglePart::html(body))?;
 
         Ok(self.mailer.send(&email)?)
     }
 
-    pub fn send_noreply<'a>(
+    pub fn send_noreply(
         &self,
-        subject: &'a str,
-        body: &'a str,
+        subject: &str,
+        body: String,
         to: Mailbox,
     ) -> Result<Response> {
         self.send(subject, body, self.noreply_mailbox.clone(), to)
     }
 }
 
-pub fn make_mail_box<'a>(name: &'a str, email: &'a str) -> Result<Mailbox> {
+pub fn make_mail_box(name: &str, email: &str) -> Result<Mailbox> {
     Ok(format!("{} <{}>", name, email).parse()?)
 }
 
