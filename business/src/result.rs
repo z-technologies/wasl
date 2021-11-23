@@ -67,6 +67,9 @@ pub enum UserError {
 
     #[display(fmt = "email is already in use")]
     EmailAlreadyInUse,
+
+    #[display(fmt = "invalid confirmation details")]
+    InvalidConfirmationDetails,
 }
 
 impl std::error::Error for InternalError {}
