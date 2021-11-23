@@ -27,6 +27,10 @@ impl AuthSerivce {
         let user = self.ctx.users().get_by_username(username)?;
 
         if let Some(user) = user {
+            if !user.is_active {
+                return Err(UserError::NotFound);
+            }
+
             let groups = self.ctx.users().get_user_groups(&user)?;
 
             return if is_match(password, &user.password_hash)? {
