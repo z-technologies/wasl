@@ -34,16 +34,7 @@ pub fn setup_data(cfg: &mut web::ServiceConfig, settings: Arc<Settings>) {
     let ctx = DbContext::new(db_pool);
 
     // create services
-    let email_svc = Arc::new(
-        EmailService::new(
-            &settings.email.smtp_host,
-            settings.email.smtp_port,
-            &settings.email.smtp_username,
-            &settings.email.smtp_password,
-            settings.email.require_tls,
-        )
-        .unwrap(),
-    );
+    let email_svc = Arc::new(EmailService::new(&settings.email).unwrap());
     let auth_svc = Arc::new(AuthSerivce::new(ctx.clone(), email_svc.clone()));
 
     // export data

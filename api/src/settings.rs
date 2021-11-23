@@ -1,6 +1,7 @@
 use crate::result::Result;
 
 use business::io;
+use business::services::email::EmailSettings;
 
 use config::{Config, ConfigError, Environment, File};
 use serde::Deserialize;
@@ -56,17 +57,6 @@ impl SecuritySettings {
     pub fn private_key(&self) -> Result<Vec<u8>> {
         Ok(io::load_file_bytes(&self.private_key_path)?)
     }
-}
-
-#[derive(Debug, Deserialize)]
-pub struct EmailSettings {
-    pub smtp_host: String,
-    pub smtp_port: u16,
-    pub smtp_username: String,
-    pub smtp_password: String,
-
-    pub noreply_address: String,
-    pub require_tls: bool,
 }
 
 #[derive(Debug, Deserialize)]
