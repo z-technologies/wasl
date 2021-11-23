@@ -62,18 +62,18 @@ impl AuthSerivce {
         &self,
         username: &'a str,
         password: &'a str,
-        _token: &'a str,
+        token: &'a str,
     ) -> Result<()> {
-        // TODO:
-        // validate token
-
         let user = self.ctx.users().get_by_username(username)?;
 
         if let Some(mut user) = user {
+            let conf = self.validate_token(&user, token)?;
+
             if user.is_active {
                 Err(UserError::CouldNotUpdateAccount)
             } else {
                 user.password_hash = Some(make_hash(password)?);
+                self.ctx.confirmations().delete(&conf)?;
                 self.ctx.users().update(&user)?;
                 Ok(())
             }
@@ -114,6 +114,20 @@ impl AuthSerivce {
         };
 
         Ok(self.ctx.confirmations().insert(&conf)?)
+    }
+
+    fn validate_token(&self, user: &User, token: &str) -> Result<Confirmation> {
+        let conf = self.ctx.confirmations().get_by_token(token)?;
+
+        if let Some(conf) = conf {
+            if conf.user_id == user.id && conf.token == token {
+                Ok(conf)
+            } else {
+                Err(UserError::InvalidConfirmationDetails)
+            }
+        } else {
+            Err(UserError::InvalidConfirmationDetails)
+        }
     }
 }
 
