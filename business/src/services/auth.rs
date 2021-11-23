@@ -1,17 +1,22 @@
 use crate::result::{Result, UserError};
 use crate::security::password::{is_match, make_hash};
+use crate::security::random::generate_alphanum_string;
+use crate::services::email::{make_mail_box, EmailService};
 
 use data::context::DbContext;
-use data::models::{Group, NewUser, User};
+use data::models::{Confirmation, Group, NewConfirmation, NewUser, User};
 use data::repos::Repo;
+
+use std::sync::Arc;
 
 pub struct AuthSerivce {
     ctx: DbContext,
+    email_svc: Arc<EmailService>,
 }
 
 impl AuthSerivce {
-    pub fn new(ctx: DbContext) -> AuthSerivce {
-        AuthSerivce { ctx }
+    pub fn new(ctx: DbContext, email_svc: Arc<EmailService>) -> AuthSerivce {
+        AuthSerivce { ctx, email_svc }
     }
 
     pub fn signin<'a>(
@@ -48,9 +53,7 @@ impl AuthSerivce {
         }
 
         let user = self.ctx.users().insert(&new_user)?;
-
-        // TODO:
-        // handle email verification
+        self.send_verification_email(&user)?;
 
         Ok(user)
     }
@@ -78,4 +81,55 @@ impl AuthSerivce {
             Err(UserError::NotFound)
         }
     }
+
+    pub fn send_verification_email(&self, user: &User) -> Result<()> {
+        let conf =
+            self.create_confirmation(user, chrono::Duration::minutes(30))?;
+
+        let ret = self.email_svc.send_noreply(
+            "Account Confirmation",
+            &build_confirmation_email(user, &conf),
+            make_mail_box(&user.username, &user.email)?,
+        );
+
+        if let Err(err) = ret {
+            self.ctx.confirmations().delete(&conf)?;
+            return Err(err);
+        }
+
+        Ok(())
+    }
+
+    fn create_confirmation(
+        &self,
+        user: &User,
+        valid_for: chrono::Duration,
+    ) -> Result<Confirmation> {
+        let conf = NewConfirmation {
+            user_id: user.id,
+            otp: generate_alphanum_string::<8>(),
+            token: generate_alphanum_string::<32>(),
+            issued_at: chrono::Utc::now(),
+            expires_at: chrono::Utc::now() + valid_for,
+        };
+
+        Ok(self.ctx.confirmations().insert(&conf)?)
+    }
+}
+
+fn build_confirmation_email(user: &User, conf: &Confirmation) -> String {
+    format!(
+        r#"
+          Hello, {username}!
+
+          Your activation code is: {otp}
+          Activate directly: http://localhost:8080/api/v1/auth/activate/{token}
+
+          This link expires on {expires}.
+        "#,
+        username = user.username,
+        otp = conf.otp,
+        token = conf.token,
+        expires = conf.expires_at
+    )
 }
