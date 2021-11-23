@@ -50,7 +50,7 @@ impl ResponseError for ApiError {
                     StatusCode::INTERNAL_SERVER_ERROR
                 }
                 UserError::NotFound => StatusCode::NOT_FOUND,
-                UserError::PasswordNotSet => StatusCode::FORBIDDEN,
+                UserError::InvalidConfirmationDetails => StatusCode::FORBIDDEN,
                 UserError::InvalidUsernameOrPassword => {
                     StatusCode::UNAUTHORIZED
                 }
