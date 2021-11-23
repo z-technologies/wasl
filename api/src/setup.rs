@@ -21,7 +21,8 @@ pub fn setup_handlers(cfg: &mut web::ServiceConfig) {
                 web::scope("/auth")
                     .service(auth::signin)
                     .service(auth::signup)
-                    .service(auth::set_initial_password),
+                    .service(auth::activate_with_token)
+                    .service(auth::activate_with_otp),
             )
     });
 }
