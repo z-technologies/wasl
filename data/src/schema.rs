@@ -29,7 +29,7 @@ table! {
         id -> Int4,
         username -> Varchar,
         email -> Varchar,
-        password_hash -> Nullable<Varchar>,
+        password_hash -> Varchar,
         is_active -> Bool,
         first_name -> Nullable<Varchar>,
         last_name -> Nullable<Varchar>,

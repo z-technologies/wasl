@@ -26,7 +26,7 @@ pub struct User {
     #[validate(email)]
     pub email: String,
     #[serde(skip)]
-    pub password_hash: Option<String>,
+    pub password_hash: String,
     #[serde(skip)]
     pub is_active: bool,
 
@@ -48,6 +48,7 @@ pub struct NewUser {
     pub username: String,
     #[validate(email)]
     pub email: String,
+    pub password_hash: String,
 }
 
 #[derive(Identifiable, Queryable, Associations)]

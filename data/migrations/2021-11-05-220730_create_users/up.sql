@@ -3,7 +3,7 @@ CREATE TABLE users (
 
     username       VARCHAR       NOT NULL UNIQUE,
     email          VARCHAR       NOT NULL UNIQUE,
-    password_hash  VARCHAR(128)  NULL,
+    password_hash  VARCHAR       NOT NULL,
     is_active      BOOLEAN       NOT NULL DEFAULT FALSE,
 
     first_name     VARCHAR       NULL,
