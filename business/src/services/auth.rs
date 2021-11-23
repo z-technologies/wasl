@@ -1,5 +1,5 @@
 use crate::result::{Result, UserError};
-use crate::security::password::{is_match, make_hash};
+use crate::security::password::is_match;
 use crate::security::random::generate_alphanum_string;
 use crate::services::email::{make_mail_box, EmailService};
 
@@ -27,20 +27,16 @@ impl AuthSerivce {
         let user = self.ctx.users().get_by_username(username)?;
 
         if let Some(user) = user {
-            if let Some(hash) = &user.password_hash {
-                let groups = self.ctx.users().get_user_groups(&user)?;
+            let groups = self.ctx.users().get_user_groups(&user)?;
 
-                if is_match(password, &hash)? {
-                    Ok((user, groups))
-                } else {
-                    Err(UserError::InvalidUsernameOrPassword)
-                }
+            return if is_match(password, &user.password_hash)? {
+                Ok((user, groups))
             } else {
-                Err(UserError::PasswordNotSet)
-            }
-        } else {
-            Err(UserError::InvalidUsernameOrPassword)
+                Err(UserError::InvalidUsernameOrPassword)
+            };
         }
+
+        return Err(UserError::InvalidUsernameOrPassword);
     }
 
     pub fn signup<'a>(&self, new_user: &'a NewUser) -> Result<User> {
@@ -58,31 +54,21 @@ impl AuthSerivce {
         Ok(user)
     }
 
-    pub fn set_initial_password<'a>(
+    pub fn activate_with_token(
         &self,
-        username: &'a str,
-        password: &'a str,
-        token: &'a str,
+        username: &str,
+        token: &str,
     ) -> Result<()> {
-        let user = self.ctx.users().get_by_username(username)?;
-
-        if let Some(mut user) = user {
-            let conf = self.validate_token(&user, token)?;
-
-            if user.is_active {
-                Err(UserError::CouldNotUpdateAccount)
-            } else {
-                user.password_hash = Some(make_hash(password)?);
-                self.ctx.confirmations().delete(&conf)?;
-                self.ctx.users().update(&user)?;
-                Ok(())
-            }
-        } else {
-            Err(UserError::NotFound)
-        }
+        let conf = self.ctx.confirmations().get_by_token(token)?;
+        Ok(self.activate_user(username, conf, |c| c.token == token)?)
     }
 
-    pub fn send_verification_email(&self, user: &User) -> Result<()> {
+    pub fn activate_with_otp(&self, username: &str, otp: &str) -> Result<()> {
+        let conf = self.ctx.confirmations().get_by_otp(otp)?;
+        Ok(self.activate_user(username, conf, |c| c.otp == otp)?)
+    }
+
+    fn send_verification_email(&self, user: &User) -> Result<()> {
         let conf =
             self.create_confirmation(user, chrono::Duration::minutes(30))?;
 
@@ -116,18 +102,36 @@ impl AuthSerivce {
         Ok(self.ctx.confirmations().insert(&conf)?)
     }
 
-    fn validate_token(&self, user: &User, token: &str) -> Result<Confirmation> {
-        let conf = self.ctx.confirmations().get_by_token(token)?;
+    fn activate_user<F>(
+        &self,
+        username: &str,
+        conf: Option<Confirmation>,
+        is_valid_func: F,
+    ) -> Result<()>
+    where
+        F: Fn(&Confirmation) -> bool,
+    {
+        let mut user = match self.ctx.users().get_by_username(username)? {
+            Some(user) => user,
+            None => return Err(UserError::NotFound),
+        };
 
         if let Some(conf) = conf {
-            if conf.user_id == user.id && conf.token == token {
-                Ok(conf)
-            } else {
-                Err(UserError::InvalidConfirmationDetails)
+            if user.is_active {
+                return Err(UserError::CouldNotUpdateAccount);
             }
-        } else {
-            Err(UserError::InvalidConfirmationDetails)
+
+            if conf.user_id == user.id && is_valid_func(&conf) {
+                user.is_active = true;
+
+                self.ctx.confirmations().delete(&conf)?;
+                self.ctx.users().update(&user)?;
+
+                return Ok(());
+            }
         }
+
+        return Err(UserError::InvalidConfirmationDetails);
     }
 }
 
@@ -139,12 +143,20 @@ fn build_confirmation_email(user: &User, conf: &Confirmation) -> String {
 </p>
 
 <p style="line-height: 2em">
-	Your activation code is: <b style="color:#414141; background-color: #efefef; padding: 8px 16px">{otp}</b><br>
-	Activate directly <a href="http://localhost:8080/api/v1/auth/activate/{token}">from here</a> <br>
+    Your activation code is:
+    <b style="color:#414141; background-color: #efefef; padding: 8px 16px">
+        {otp}
+    </b>
+    <br>
+    Activate directly
+    <a href="http://localhost:8080/api/v1/auth/activate/{token}">
+        from here
+    </a>
+    <br>
 </p>
-  
+
 <footer>This email expires on <b>{expires}.</footer>
-        "#,
+"#,
         username = user.username,
         otp = conf.otp,
         token = conf.token,

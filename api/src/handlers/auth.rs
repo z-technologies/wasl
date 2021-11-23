@@ -1,12 +1,13 @@
 use crate::auth::token::Claims;
-use crate::result::Result;
+use crate::result::{ApiError, Result};
 use crate::settings::Settings;
 
+use business::security::password::make_hash;
 use business::services::auth::AuthSerivce;
 use data::models::user::NewUser;
 use data::models::validate::RE_USERNAME;
 
-use actix_web::{post, put, web, HttpResponse};
+use actix_web::{get, post, web, HttpResponse};
 use serde::Deserialize;
 use validator::Validate;
 
@@ -35,27 +36,32 @@ pub async fn signin(
 
 #[post("/signup")]
 pub async fn signup(
-    form: web::Json<NewUser>,
+    form: web::Json<SignupForm>,
     auth: web::Data<Arc<AuthSerivce>>,
 ) -> Result<HttpResponse> {
     form.validate()?;
 
-    let user = web::block(move || auth.signup(&form)).await?;
+    let new_user = form.into_inner().into_new_user()?;
+    let user = web::block(move || auth.signup(&new_user)).await?;
+
     Ok(HttpResponse::Created().json(user))
 }
 
-#[put("/set-initial-password")]
-pub async fn set_initial_password(
-    auth: web::Data<AuthSerivce>,
-    form: web::Json<UpdatePasswordForm>,
+#[get("/token-activate/{username}/{token}")]
+pub async fn activate_with_token(
+    auth: web::Data<Arc<AuthSerivce>>,
+    web::Path((username, token)): web::Path<(String, String)>,
 ) -> Result<HttpResponse> {
-    form.validate()?;
+    web::block(move || auth.activate_with_token(&username, &token)).await?;
+    Ok(HttpResponse::Accepted().finish())
+}
 
-    web::block(move || {
-        auth.set_initial_password(&form.username, &form.password, &form.token)
-    })
-    .await?;
-
+#[get("/otp-activate/{username}/{token}")]
+pub async fn activate_with_otp(
+    auth: web::Data<Arc<AuthSerivce>>,
+    web::Path((username, token)): web::Path<(String, String)>,
+) -> Result<HttpResponse> {
+    web::block(move || auth.activate_with_otp(&username, &token)).await?;
     Ok(HttpResponse::Accepted().finish())
 }
 
@@ -66,11 +72,26 @@ pub struct SigninForm {
     password: String,
 }
 
-#[derive(Deserialize, Validate)]
-pub struct UpdatePasswordForm {
+#[derive(Debug, Deserialize, Validate)]
+pub struct SignupForm {
     #[validate(regex = "RE_USERNAME")]
-    username: String,
-    #[validate(length(min = 6, max = 32))]
-    password: String,
-    token: String,
+    pub username: String,
+    #[validate(email)]
+    pub email: String,
+    pub password: String,
+}
+
+impl SignupForm {
+    fn into_new_user(self) -> Result<NewUser> {
+        let password = match make_hash(&self.password) {
+            Ok(password) => password,
+            Err(err) => return Err(ApiError::UserError(err)),
+        };
+
+        Ok(NewUser {
+            username: self.username,
+            email: self.email,
+            password_hash: password,
+        })
+    }
 }
