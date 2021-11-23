@@ -25,7 +25,7 @@ pub async fn signin(
         web::block(move || auth.signin(&form.username, &form.password)).await?;
 
     let token = Claims::for_user(
-        &user,
+        user,
         groups,
         settings.security.token_expiration_seconds,
     )?

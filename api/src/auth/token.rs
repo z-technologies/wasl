@@ -14,12 +14,12 @@ pub struct Claims {
 
 impl Claims {
     pub fn for_user(
-        user: &User,
+        user: User,
         groups: Vec<Group>,
         valid_for: i64,
     ) -> Result<Claims> {
         Ok(Claims {
-            sub: user.username.clone(),
+            sub: user.username,
             aud: groups,
             exp: (chrono::Utc::now() + chrono::Duration::seconds(valid_for))
                 .timestamp() as usize,
