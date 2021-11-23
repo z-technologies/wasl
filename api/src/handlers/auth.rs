@@ -10,11 +10,13 @@ use actix_web::{post, put, web, HttpResponse};
 use serde::Deserialize;
 use validator::Validate;
 
+use std::sync::Arc;
+
 #[post("/signin")]
 pub async fn signin(
     form: web::Json<SigninForm>,
-    auth: web::Data<AuthSerivce>,
-    settings: web::Data<Settings>,
+    auth: web::Data<Arc<AuthSerivce>>,
+    settings: web::Data<Arc<Settings>>,
 ) -> Result<HttpResponse> {
     form.validate()?;
 
@@ -33,16 +35,12 @@ pub async fn signin(
 
 #[post("/signup")]
 pub async fn signup(
-    auth: web::Data<AuthSerivce>,
     form: web::Json<NewUser>,
+    auth: web::Data<Arc<AuthSerivce>>,
 ) -> Result<HttpResponse> {
     form.validate()?;
 
     let user = web::block(move || auth.signup(&form)).await?;
-
-    // TODO:
-    // handle email verification
-
     Ok(HttpResponse::Created().json(user))
 }
 
