@@ -27,6 +27,7 @@ pub struct DatabaseSettings {
     pub username: String,
     pub password: String,
     pub database: String,
+    pub max_pool_connections: u32,
 }
 
 impl DatabaseSettings {
