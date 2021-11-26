@@ -7,9 +7,17 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Claims {
-    sub: String,
-    aud: Vec<Group>,
-    exp: usize,
+    #[serde(rename = "sub")]
+    username: String,
+
+    #[serde(rename = "aud")]
+    groups: Vec<Group>,
+
+    #[serde(rename = "iat")]
+    issued_at: i64,
+
+    #[serde(rename = "exp")]
+    expires_at: i64,
 }
 
 impl Claims {
@@ -19,10 +27,12 @@ impl Claims {
         valid_for: i64,
     ) -> Result<Claims> {
         Ok(Claims {
-            sub: user.username,
-            aud: groups,
-            exp: (chrono::Utc::now() + chrono::Duration::seconds(valid_for))
-                .timestamp() as usize,
+            username: user.username,
+            groups,
+            issued_at: chrono::Utc::now().timestamp(),
+            expires_at: (chrono::Utc::now()
+                + chrono::Duration::seconds(valid_for))
+            .timestamp(),
         })
     }
 
