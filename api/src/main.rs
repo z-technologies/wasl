@@ -10,14 +10,16 @@ extern crate validator;
 
 mod auth;
 mod handlers;
+mod middlewares;
 mod result;
 mod settings;
 mod setup;
 
+use crate::middlewares::auth::AuthMiddlewareFactory;
 use crate::settings::Settings;
 
 use actix_identity::{CookieIdentityPolicy, IdentityService};
-use actix_web::{middleware, App, HttpServer};
+use actix_web::{middleware::Logger, App, HttpServer};
 
 use std::sync::Arc;
 
@@ -30,12 +32,13 @@ async fn main() -> std::io::Result<()> {
 
     HttpServer::new(move || {
         App::new()
-            .wrap(middleware::Logger::default())
+            .wrap(AuthMiddlewareFactory::new(settings.clone()))
             .wrap(IdentityService::new(
                 CookieIdentityPolicy::new(&[0; 32])
                     .name("auth-cookie")
                     .secure(false),
             ))
+            .wrap(Logger::default())
             .configure(setup::setup_handlers)
             .configure(|cfg| setup::setup_data(cfg, settings.clone()))
     })
