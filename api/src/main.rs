@@ -1,4 +1,3 @@
-extern crate actix_identity;
 extern crate actix_web;
 extern crate chrono;
 extern crate config;
@@ -18,7 +17,6 @@ mod setup;
 use crate::middlewares::auth::AuthMiddlewareFactory;
 use crate::settings::Settings;
 
-use actix_identity::{CookieIdentityPolicy, IdentityService};
 use actix_web::{middleware::Logger, App, HttpServer};
 
 use std::sync::Arc;
@@ -33,11 +31,6 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(move || {
         App::new()
             .wrap(AuthMiddlewareFactory::new(settings.clone()))
-            .wrap(IdentityService::new(
-                CookieIdentityPolicy::new(&[0; 32])
-                    .name("auth-cookie")
-                    .secure(false),
-            ))
             .wrap(Logger::default())
             .configure(setup::setup_handlers)
             .configure(|cfg| setup::setup_data(cfg, settings.clone()))
