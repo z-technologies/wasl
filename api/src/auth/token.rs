@@ -1,4 +1,4 @@
-use crate::result::Result;
+use crate::result::{ApiError, Result};
 
 use data::models::{Group, User};
 
@@ -51,5 +51,17 @@ impl Claims {
             &Validation::default(),
         )?
         .claims)
+    }
+
+    pub fn from_bearer(token: &str, pk: &Vec<u8>) -> Result<Claims> {
+        if !token.to_lowercase().starts_with("bearer ") {
+            return Err(ApiError::TokenError(
+                jsonwebtoken::errors::Error::from(
+                    jsonwebtoken::errors::ErrorKind::InvalidToken,
+                ),
+            ));
+        }
+
+        Self::decode(&token[6..], pk)
     }
 }
