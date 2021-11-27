@@ -1,9 +1,8 @@
-use crate::auth::token::Claims;
-use crate::result::ApiError;
-
+use crate::auth::{groups::AuthGroup, token::Claims};
+use crate::result::{ApiError, Result};
 use actix_web::FromRequest;
-use core::future::ready;
-use core::future::Ready;
+
+use std::future::{ready, Ready};
 
 pub struct Identity(Claims);
 
@@ -22,6 +21,38 @@ impl FromRequest for Identity {
         };
 
         ready(result)
+    }
+}
+
+impl Identity {
+    pub fn has(&self, group: AuthGroup) -> Result<bool> {
+        if self.groups.iter().any(|g| g.name == group.to_string()) {
+            Ok(true)
+        } else {
+            Err(ApiError::PermissionDenied)
+        }
+    }
+
+    pub fn any(&self, groups: &[AuthGroup]) -> Result<()> {
+        if groups
+            .iter()
+            .any(|g| self.groups.iter().any(|gg| gg.name == g.to_string()))
+        {
+            Ok(())
+        } else {
+            Err(ApiError::PermissionDenied)
+        }
+    }
+
+    pub fn all(&self, groups: &[AuthGroup]) -> Result<()> {
+        if groups
+            .iter()
+            .all(|g| self.groups.iter().any(|gg| gg.name == g.to_string()))
+        {
+            Ok(())
+        } else {
+            Err(ApiError::PermissionDenied)
+        }
     }
 }
 
