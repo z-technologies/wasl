@@ -8,16 +8,16 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Claims {
     #[serde(rename = "sub")]
-    username: String,
+    pub username: String,
 
     #[serde(rename = "aud")]
-    groups: Vec<Group>,
+    pub groups: Vec<Group>,
 
     #[serde(rename = "iat")]
-    issued_at: i64,
+    pub issued_at: i64,
 
     #[serde(rename = "exp")]
-    expires_at: i64,
+    pub expires_at: i64,
 }
 
 impl Claims {
