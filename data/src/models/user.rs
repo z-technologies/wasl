@@ -1,8 +1,6 @@
-use crate::models::group::Group;
 use crate::models::validate::RE_USERNAME;
-use crate::models::KeyType;
-use crate::schema::user_groups;
-use crate::schema::users;
+use crate::models::{Group, KeyType};
+use crate::schema::{user_groups, users};
 
 use serde::{Deserialize, Serialize};
 use validator::Validate;
