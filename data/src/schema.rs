@@ -17,6 +17,25 @@ table! {
 }
 
 table! {
+    products (id) {
+        id -> Int4,
+        title -> Varchar,
+        description -> Varchar,
+        available_quantity -> Int4,
+    }
+}
+
+table! {
+    services (id) {
+        id -> Int4,
+        title -> Varchar,
+        description -> Varchar,
+        available_begin -> Nullable<Time>,
+        available_end -> Nullable<Time>,
+    }
+}
+
+table! {
     user_groups (id) {
         id -> Int4,
         user_id -> Int4,
@@ -46,6 +65,8 @@ joinable!(user_groups -> users (user_id));
 allow_tables_to_appear_in_same_query!(
     confirmations,
     groups,
+    products,
+    services,
     user_groups,
     users,
 );
