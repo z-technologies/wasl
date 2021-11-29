@@ -3,6 +3,7 @@ use crate::repos::{DbPool, Repo};
 use crate::result::{DataError, Result};
 
 use data_derive::Repository;
+
 use diesel::dsl::any;
 use diesel::prelude::*;
 
