@@ -9,6 +9,6 @@ use diesel::prelude::*;
 #[repo_table_name = "services"]
 #[repo_model = "Service"]
 #[repo_insert_model = "NewService"]
-pub struct ProductsRepo {
+pub struct ServicesRepo {
     pub pool: DbPool,
 }
