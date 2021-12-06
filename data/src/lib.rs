@@ -1,5 +1,3 @@
-extern crate data_derive;
-
 pub mod context;
 pub mod models;
 pub mod repos;
