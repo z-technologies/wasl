@@ -48,8 +48,5 @@ pub fn create_connection_pool(
 ) -> Result<DbPool> {
     let manager = DbConnectionManager::new(url);
 
-    match DbPool::builder().max_size(max_connections).build(manager) {
-        Ok(pool) => Ok(pool),
-        Err(err) => Err(DataError::ConnectionPoolError(format!("{}", err))),
-    }
+    Ok(DbPool::builder().max_size(max_connections).build(manager)?)
 }
