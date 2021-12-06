@@ -1,7 +1,5 @@
 use crate::models::{Group, User, UserGroup};
-use crate::repos::experimental::Repo;
-use crate::repos::DbPool;
-use crate::repos::DbPooledConnection;
+use crate::repos::{DbPool, DbPooledConnection, Repo};
 use crate::result::Result;
 
 use diesel::dsl::any;

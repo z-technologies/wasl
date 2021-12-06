@@ -1,6 +1,5 @@
 use crate::models::Product;
-use crate::repos::experimental::Repo;
-use crate::repos::{DbPool, DbPooledConnection};
+use crate::repos::{DbPool, DbPooledConnection, Repo};
 use crate::result::Result;
 
 #[derive(Clone)]
