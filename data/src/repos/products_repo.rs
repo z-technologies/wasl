@@ -1,14 +1,15 @@
-use crate::models::product::*;
-use crate::repos::DbPool;
-use crate::result::{DataError, Result};
+use crate::models::Product;
+use crate::repos::experimental::Repo;
+use crate::repos::{DbPool, DbPooledConnection};
+use crate::result::Result;
 
-use data_derive::Repository;
-use diesel::prelude::*;
-
-#[derive(Clone, Repository)]
-#[repo_table_name = "products"]
-#[repo_model = "Product"]
-#[repo_insert_model = "NewProduct"]
+#[derive(Clone)]
 pub struct ProductsRepo {
     pub pool: DbPool,
+}
+
+impl Repo<Product> for ProductsRepo {
+    fn get_connection(&self) -> Result<DbPooledConnection> {
+        Ok(self.pool.get()?)
+    }
 }

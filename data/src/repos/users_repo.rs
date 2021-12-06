@@ -1,16 +1,13 @@
-use crate::models::{Group, NewUser, User, UserGroup};
-use crate::repos::{DbPool, Repo};
-use crate::result::{DataError, Result};
-
-use data_derive::Repository;
+use crate::models::{Group, User, UserGroup};
+use crate::repos::experimental::Repo;
+use crate::repos::DbPool;
+use crate::repos::DbPooledConnection;
+use crate::result::Result;
 
 use diesel::dsl::any;
 use diesel::prelude::*;
 
-#[derive(Clone, Repository)]
-#[repo_table_name = "users"]
-#[repo_model = "User"]
-#[repo_insert_model = "NewUser"]
+#[derive(Clone)]
 pub struct UsersRepo {
     pub pool: DbPool,
 }
@@ -21,7 +18,7 @@ impl UsersRepo {
 
         Ok(users
             .filter(username.eq(uname))
-            .first::<User>(&self.get_connection()?)
+            .first(&self.get_connection()?)
             .optional()?)
     }
 
@@ -30,7 +27,7 @@ impl UsersRepo {
 
         Ok(users
             .filter(email.eq(em))
-            .first::<User>(&self.get_connection()?)
+            .first(&self.get_connection()?)
             .optional()?)
     }
 
@@ -58,6 +55,12 @@ impl UsersRepo {
 
         Ok(groups::table
             .filter(groups::id.eq(any(group_ids)))
-            .load::<Group>(&self.get_connection()?)?)
+            .load(&self.get_connection()?)?)
+    }
+}
+
+impl Repo<User> for UsersRepo {
+    fn get_connection(&self) -> Result<DbPooledConnection> {
+        Ok(self.pool.get()?)
     }
 }

@@ -1,14 +1,11 @@
-use crate::models::confirmation::*;
-use crate::repos::{DbPool, Repo};
-use crate::result::{DataError, Result};
+use crate::models::Confirmation;
+use crate::repos::experimental::Repo;
+use crate::repos::{DbPool, DbPooledConnection};
+use crate::result::Result;
 
-use data_derive::Repository;
 use diesel::prelude::*;
 
-#[derive(Clone, Repository)]
-#[repo_table_name = "confirmations"]
-#[repo_model = "Confirmation"]
-#[repo_insert_model = "NewConfirmation"]
+#[derive(Clone)]
 pub struct ConfirmationsRepo {
     pub pool: DbPool,
 }
@@ -30,5 +27,11 @@ impl ConfirmationsRepo {
             .filter(otp.eq(o))
             .first::<Confirmation>(&self.get_connection()?)
             .optional()?)
+    }
+}
+
+impl Repo<Confirmation> for ConfirmationsRepo {
+    fn get_connection(&self) -> Result<DbPooledConnection> {
+        Ok(self.pool.get()?)
     }
 }

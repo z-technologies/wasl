@@ -1,14 +1,15 @@
-use crate::models::service::*;
-use crate::repos::DbPool;
-use crate::result::{DataError, Result};
+use crate::models::Service;
+use crate::repos::experimental::Repo;
+use crate::repos::{DbPool, DbPooledConnection};
+use crate::result::Result;
 
-use data_derive::Repository;
-use diesel::prelude::*;
-
-#[derive(Clone, Repository)]
-#[repo_table_name = "services"]
-#[repo_model = "Service"]
-#[repo_insert_model = "NewService"]
+#[derive(Clone)]
 pub struct ServicesRepo {
     pub pool: DbPool,
+}
+
+impl Repo<Service> for ServicesRepo {
+    fn get_connection(&self) -> Result<DbPooledConnection> {
+        Ok(self.pool.get()?)
+    }
 }
