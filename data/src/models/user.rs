@@ -2,6 +2,7 @@ use crate::models::validate::RE_USERNAME;
 use crate::models::{Group, KeyType};
 use crate::schema::{user_groups, users};
 
+use diesel::associations::Identifiable;
 use serde::{Deserialize, Serialize};
 use validator::Validate;
 
@@ -56,4 +57,14 @@ pub struct UserGroup {
     pub id: KeyType,
     pub user_id: KeyType,
     pub group_id: KeyType,
+}
+
+// TODO:
+// Find a better solution to update problems that this
+impl Identifiable for User {
+    type Id = KeyType;
+
+    fn id(self) -> Self::Id {
+        self.id
+    }
 }
