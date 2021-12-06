@@ -9,8 +9,7 @@ pub enum DataError {
     ConnectionError(diesel::result::ConnectionError),
 
     #[display(fmt = "connection pool: {:?}", _0)]
-    #[from(ignore)]
-    ConnectionPoolError(String),
+    ConnectionPoolError(diesel::r2d2::PoolError),
 }
 
 pub type Result<T> = std::result::Result<T, DataError>;
