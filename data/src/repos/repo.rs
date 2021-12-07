@@ -3,13 +3,15 @@ use crate::result::Result;
 
 use diesel::{
     associations::HasTable,
-    helper_types::{Find, Select, Update},
+    expression::{exists::Exists, subselect::ValidSubselect},
+    helper_types::{Filter, Find, Select, Update},
     prelude::*,
     query_builder::{
         AsChangeset, DeleteStatement, InsertStatement, IntoUpdateTarget,
+        QueryFragment, QueryId, SelectQuery,
     },
     query_dsl::{
-        methods::{ExecuteDsl, FindDsl, SelectDsl},
+        methods::{ExecuteDsl, FilterDsl, FindDsl, SelectDsl},
         LoadQuery,
     },
     r2d2::{ConnectionManager, Pool, PooledConnection},
@@ -77,6 +79,27 @@ where
             .get_result(&self.get_connection()?)?)
     }
 
+    fn filter<E: BooleanExpression>(&self, exp: E) -> Result<Vec<M>>
+    where
+        M::Table: FilterDsl<E>,
+        Filter<M::Table, E>: LoadQuery<DbPooledConnection, M>,
+    {
+        Ok(QueryDsl::filter(M::table(), exp).load(&self.get_connection()?)?)
+    }
+
+    fn any<E: BooleanExpression>(&self, exp: E) -> Result<bool>
+    where
+        M::Table: FilterDsl<E>,
+        Filter<M::Table, E>: SelectQuery + ValidSubselect<()> + QueryId,
+        Exists<Filter<M::Table, E>>: SelectDsl<Exists<Filter<M::Table, E>>>
+            + QueryFragment<<DbConnection as Connection>::Backend>,
+    {
+        use diesel::dsl::*;
+
+        Ok(select(exists(QueryDsl::filter(M::table(), exp)))
+            .get_result(&self.get_connection()?)?)
+    }
+
     fn get_connection(&self) -> Result<DbPooledConnection>;
 }
 
@@ -87,7 +110,5 @@ type DeleteFindStatement<F> = DeleteStatement<
 
 pub trait BooleanExpression:
     diesel::Expression<SqlType = diesel::sql_types::Bool>
-    + diesel::IntoSql
-    + diesel::expression::NonAggregate
 {
 }
