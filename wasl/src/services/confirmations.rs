@@ -1,10 +1,10 @@
+use crate::data::connection::*;
+use crate::data::models::{Confirmation, NewConfirmation, User};
 use crate::result::{Result, UserError};
 use crate::security::random::generate_alphanum_string;
 use crate::services::UsersService;
 
-use data::connection::*;
-use data::diesel::prelude::*;
-use data::models::{Confirmation, NewConfirmation, User};
+use diesel::prelude::*;
 
 use std::sync::Arc;
 
@@ -22,49 +22,35 @@ impl ConfirmationsService {
     }
 
     pub fn get_by_token(&self, t: &str) -> Result<Confirmation> {
-        use data::schema::confirmations::dsl::*;
+        use crate::data::schema::confirmations::dsl::*;
 
-        // TODO:
-        // Properly handle NotFound error
-
-        data::result::adapt(
-            confirmations
-                .filter(token.eq(t))
-                .first::<Confirmation>(&self.conn.get()?)
-                .optional(),
-        )?
-        .ok_or(UserError::InvalidConfirmationDetails)
+        confirmations
+            .filter(token.eq(t))
+            .first::<Confirmation>(&self.conn.get()?)
+            .optional()?
+            .ok_or(UserError::InvalidConfirmationDetails)
     }
 
     pub fn get_by_otp(&self, o: &str) -> Result<Confirmation> {
-        use data::schema::confirmations::dsl::*;
+        use crate::data::schema::confirmations::dsl::*;
 
-        // TODO:
-        // Properly handle NotFound error
-
-        data::result::adapt(
-            confirmations
-                .filter(otp.eq(o))
-                .first::<Confirmation>(&self.conn.get()?)
-                .optional(),
-        )?
-        .ok_or(UserError::InvalidConfirmationDetails)
+        confirmations
+            .filter(otp.eq(o))
+            .first::<Confirmation>(&self.conn.get()?)
+            .optional()?
+            .ok_or(UserError::InvalidConfirmationDetails)
     }
 
     pub fn create(&self, new_conf: &NewConfirmation) -> Result<Confirmation> {
-        use data::schema::confirmations::dsl::*;
+        use crate::data::schema::confirmations::dsl::*;
 
-        Ok(data::result::adapt(
-            data::diesel::insert_into(confirmations)
-                .values(new_conf)
-                .get_result(&self.conn.get()?),
-        )?)
+        Ok(diesel::insert_into(confirmations)
+            .values(new_conf)
+            .get_result(&self.conn.get()?)?)
     }
 
     pub fn delete(&self, conf: Confirmation) -> Result<usize> {
-        Ok(data::result::adapt(
-            data::diesel::delete(&conf).execute(&self.conn.get()?),
-        )?)
+        Ok(diesel::delete(&conf).execute(&self.conn.get()?)?)
     }
 
     pub fn generate_for<const OTP_LEN: usize, const TOKEN_LEN: usize>(
