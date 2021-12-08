@@ -1,17 +1,24 @@
 use crate::result::{Result, UserError};
 use crate::security::random::generate_alphanum_string;
+use crate::services::UsersService;
 
 use data::connection::*;
 use data::diesel::prelude::*;
 use data::models::{Confirmation, NewConfirmation, User};
 
+use std::sync::Arc;
+
 pub struct ConfirmationsService {
     conn: PostgresConnection,
+    users_svc: Arc<UsersService>,
 }
 
 impl ConfirmationsService {
-    pub fn new(conn: PostgresConnection) -> ConfirmationsService {
-        ConfirmationsService { conn }
+    pub fn new(
+        conn: PostgresConnection,
+        users_svc: Arc<UsersService>,
+    ) -> ConfirmationsService {
+        ConfirmationsService { conn, users_svc }
     }
 
     pub fn get_by_token(&self, t: &str) -> Result<Confirmation> {
@@ -68,5 +75,28 @@ impl ConfirmationsService {
         };
 
         Ok(self.create(&conf)?)
+    }
+
+    pub fn confirm<F>(
+        &self,
+        conf: Confirmation,
+        user: User,
+        is_valid_func: F,
+    ) -> Result<()>
+    where
+        F: Fn(&Confirmation) -> bool,
+    {
+        if user.is_active {
+            return Err(UserError::CouldNotUpdateAccount);
+        }
+
+        if conf.user_id == user.id && is_valid_func(&conf) {
+            self.users_svc.activate(user)?;
+            self.delete(conf)?;
+
+            return Ok(());
+        }
+
+        Err(UserError::InvalidConfirmationDetails)
     }
 }

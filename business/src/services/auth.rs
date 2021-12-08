@@ -80,37 +80,20 @@ impl AuthSerivce {
         token: &str,
     ) -> Result<()> {
         let conf = self.confirmations_svc.get_by_token(token)?;
-        Ok(self.activate_user(username, conf, |c| c.token == token)?)
+        let user = self.users_svc.get_by_username(username)?;
+
+        Ok(self
+            .confirmations_svc
+            .confirm(conf, user, |c| c.token == token)?)
     }
 
     pub fn activate_with_otp(&self, username: &str, otp: &str) -> Result<()> {
         let conf = self.confirmations_svc.get_by_otp(otp)?;
-        Ok(self.activate_user(username, conf, |c| c.otp == otp)?)
-    }
-
-    fn activate_user<F>(
-        &self,
-        username: &str,
-        conf: Confirmation,
-        is_valid_func: F,
-    ) -> Result<()>
-    where
-        F: Fn(&Confirmation) -> bool,
-    {
         let user = self.users_svc.get_by_username(username)?;
 
-        if user.is_active {
-            return Err(UserError::CouldNotUpdateAccount);
-        }
-
-        if conf.user_id == user.id && is_valid_func(&conf) {
-            self.users_svc.activate(user)?;
-            self.confirmations_svc.delete(conf)?;
-
-            return Ok(());
-        }
-
-        Err(UserError::InvalidConfirmationDetails)
+        Ok(self
+            .confirmations_svc
+            .confirm(conf, user, |c| c.otp == otp)?)
     }
 }
 
