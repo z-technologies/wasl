@@ -3,5 +3,6 @@ CREATE TABLE services (
     title           VARCHAR NOT NULL,
     description     VARCHAR NOT NULL,
     available_begin TIME    NULL,
-    available_end   TIME    NULL
+    available_end   TIME    NULL,
+    user_id         SERIAL  NOT NULL REFERENCES users(id)
 );
