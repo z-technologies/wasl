@@ -2,7 +2,6 @@ use crate::models::validate::RE_USERNAME;
 use crate::models::{Group, KeyType};
 use crate::schema::{user_groups, users};
 
-use diesel::associations::Identifiable;
 use serde::{Deserialize, Serialize};
 use validator::Validate;
 
