@@ -1,7 +1,7 @@
 use crate::result::Result;
 
-use business::io;
-use business::services::email::EmailSettings;
+use wasl::io;
+use wasl::services::email::EmailSettings;
 
 use config::{Config, ConfigError, Environment, File};
 use serde::Deserialize;

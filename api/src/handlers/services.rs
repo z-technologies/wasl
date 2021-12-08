@@ -2,9 +2,9 @@ use crate::auth::groups::AuthGroup;
 use crate::auth::identity::Identity;
 use crate::result::Result;
 
-use business::services::ServicesService;
-use business::services::UsersService;
-use data::models::{KeyType, NewService, User};
+use wasl::data::models::{KeyType, NewService, User};
+use wasl::services::ServicesService;
+use wasl::services::UsersService;
 
 use actix_web::{get, post, web, HttpResponse};
 use serde::Deserialize;

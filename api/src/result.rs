@@ -1,4 +1,4 @@
-use business::result::{InternalError, UserError};
+use wasl::result::{InternalError, UserError};
 
 use actix_web::error::BlockingError;
 use actix_web::http::StatusCode;

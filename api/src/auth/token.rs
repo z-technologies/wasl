@@ -1,6 +1,6 @@
 use crate::result::{ApiError, Result};
 
-use data::models::{Group, User};
+use wasl::data::models::{Group, User};
 
 use jsonwebtoken::{Algorithm, DecodingKey, EncodingKey, Header, Validation};
 use serde::{Deserialize, Serialize};

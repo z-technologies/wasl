@@ -1,8 +1,8 @@
 use crate::auth::{groups::AuthGroup, token::Claims};
 use crate::result::{ApiError, Result};
 
-use business::services::UsersService;
-use data::models::User;
+use wasl::data::models::User;
+use wasl::services::UsersService;
 
 use actix_web::{web, FromRequest};
 

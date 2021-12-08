@@ -2,10 +2,10 @@ use crate::auth::token::Claims;
 use crate::result::{ApiError, Result};
 use crate::settings::Settings;
 
-use business::security::password::make_hash;
-use business::services::auth::AuthSerivce;
-use data::models::user::NewUser;
-use data::models::validate::RE_USERNAME;
+use wasl::data::models::user::NewUser;
+use wasl::data::models::validate::RE_USERNAME;
+use wasl::security::password::make_hash;
+use wasl::services::auth::AuthSerivce;
 
 use actix_web::{get, post, web, HttpResponse};
 use serde::Deserialize;

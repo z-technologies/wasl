@@ -1,8 +1,8 @@
 use crate::handlers::{auth, echo, services};
 use crate::settings::Settings;
 
-use business::services::*;
-use data::connection::PostgresConnection;
+use wasl::data::connection::PostgresConnection;
+use wasl::services::*;
 
 use actix_web::web;
 
