@@ -1,4 +1,4 @@
-pub mod context;
+pub mod connection;
 pub mod models;
 pub mod result;
 pub mod schema;
