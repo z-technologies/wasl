@@ -1,6 +1,8 @@
 extern crate argon2;
 extern crate base64;
 extern crate derive_more;
+#[macro_use]
+extern crate diesel;
 extern crate lettre;
 extern crate native_tls;
 #[macro_use]
