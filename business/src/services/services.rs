@@ -1,19 +1,24 @@
 use crate::result::Result;
 
-use data::context::DbContext;
+use data::context::*;
+use data::diesel::prelude::*;
 use data::models::{KeyType, Service};
-use data::repos::Repo;
 
 pub struct ServicesService {
-    ctx: DbContext,
+    conn: PostgresConnection,
 }
 
 impl ServicesService {
-    pub fn new(ctx: DbContext) -> ServicesService {
-        ServicesService { ctx }
+    pub fn new(conn: PostgresConnection) -> ServicesService {
+        ServicesService { conn }
     }
 
     pub fn get_service_by_id(&self, id: KeyType) -> Result<Service> {
-        Ok(self.ctx.services().get(id)?)
+        use data::schema::services::dsl::*;
+
+        // TODO:
+        // Properly handle errors
+
+        Ok(services.find(id).get_result(&self.conn.get()?).unwrap())
     }
 }
