@@ -1,5 +1,3 @@
-use data::result::DataError;
-
 use argon2;
 use base64;
 use derive_more::{Display, From};
@@ -16,9 +14,6 @@ pub enum DataError {
 
     #[display(fmt = "connection pool: {:?}", _0)]
     ConnectionPoolError(diesel::r2d2::PoolError),
-
-    #[display(fmt = "not found")]
-    NotFound,
 }
 
 #[derive(Debug, Display, From)]
@@ -99,15 +94,6 @@ impl From<std::env::VarError> for UserError {
     }
 }
 
-impl From<DataError> for UserError {
-    fn from(err: DataError) -> Self {
-        match err {
-            DataError::NotFound => UserError::NotFound,
-            _ => UserError::InternalError(InternalError::DataError(err)),
-        }
-    }
-}
-
 impl From<argon2::Error> for UserError {
     fn from(err: argon2::Error) -> Self {
         UserError::InternalError(InternalError::HashingError(err))
@@ -153,5 +139,26 @@ impl From<lettre::address::AddressError> for UserError {
 impl From<native_tls::Error> for UserError {
     fn from(err: native_tls::Error) -> Self {
         UserError::InternalError(InternalError::TlsError(err))
+    }
+}
+
+impl From<diesel::result::Error> for UserError {
+    fn from(err: diesel::result::Error) -> Self {
+        match err {
+            diesel::result::Error::NotFound => return UserError::NotFound,
+            _ => UserError::InternalError(DataError::from(err).into()),
+        }
+    }
+}
+
+impl From<diesel::result::ConnectionError> for UserError {
+    fn from(err: diesel::result::ConnectionError) -> Self {
+        UserError::InternalError(DataError::from(err).into())
+    }
+}
+
+impl From<diesel::r2d2::PoolError> for UserError {
+    fn from(err: diesel::r2d2::PoolError) -> Self {
+        UserError::InternalError(DataError::from(err).into())
     }
 }
