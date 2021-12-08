@@ -4,10 +4,10 @@ pub mod repos;
 pub mod result;
 pub mod schema;
 
-extern crate derive_more;
 #[macro_use]
-extern crate diesel;
+pub extern crate diesel;
 
+extern crate derive_more;
 extern crate regex;
 extern crate serde;
 extern crate serde_json;
