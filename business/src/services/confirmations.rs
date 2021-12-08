@@ -1,6 +1,6 @@
 use crate::result::Result;
 
-use data::context::*;
+use data::connection::*;
 use data::diesel::prelude::*;
 use data::models::{Confirmation, NewConfirmation};
 
@@ -55,7 +55,7 @@ impl ConfirmationsService {
         // TODO:
         // Properly handle errors
 
-        Ok(data::diesel::delete(conf)
+        Ok(data::diesel::delete(&conf)
             .execute(&self.conn.get()?)
             .unwrap())
     }

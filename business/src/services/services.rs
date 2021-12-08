@@ -1,6 +1,6 @@
 use crate::result::Result;
 
-use data::context::*;
+use data::connection::*;
 use data::diesel::prelude::*;
 use data::models::{KeyType, Service};
 

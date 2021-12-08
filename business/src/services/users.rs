@@ -1,11 +1,9 @@
 use crate::result::Result;
 use crate::result::UserError;
-use data::context::DatabaseConnection;
-use data::models::UserGroup;
 
-use data::context::PostgresConnection;
+use data::connection::*;
 use data::diesel::prelude::*;
-use data::models::{Group, NewUser, User};
+use data::models::{Group, NewUser, User, UserGroup};
 
 pub struct UsersService {
     conn: PostgresConnection,
@@ -113,7 +111,7 @@ impl UsersService {
         // TODO:
         // Properly handle errors
 
-        Ok(data::diesel::delete(user)
+        Ok(data::diesel::delete(&user)
             .execute(&self.conn.get()?)
             .unwrap())
     }
