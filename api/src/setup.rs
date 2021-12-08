@@ -2,7 +2,7 @@ use crate::handlers::{auth, echo, services};
 use crate::settings::Settings;
 
 use business::services::*;
-use data::context::PostgresConnection;
+use data::connection::PostgresConnection;
 
 use actix_web::web;
 
@@ -31,7 +31,8 @@ pub fn setup_data(cfg: &mut web::ServiceConfig, settings: Arc<Settings>) {
     // create services
     let email_svc = Arc::new(EmailService::new(&settings.email).unwrap());
     let users_svc = Arc::new(UsersService::new(conn.clone()));
-    let confirmations_svc = Arc::new(ConfirmationsService::new(conn.clone()));
+    let confirmations_svc =
+        Arc::new(ConfirmationsService::new(conn.clone(), users_svc.clone()));
     let auth_svc = Arc::new(AuthSerivce::new(
         users_svc.clone(),
         confirmations_svc.clone(),
