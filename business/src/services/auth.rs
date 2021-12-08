@@ -39,7 +39,7 @@ impl AuthSerivce {
         } else if !is_match(password, &user.password_hash)? {
             Err(UserError::InvalidUsernameOrPassword)
         } else {
-            let groups = self.users_svc.get_user_groups(&user)?;
+            let groups = self.users_svc.get_groups(&user)?;
             Ok((user, groups))
         }
     }
@@ -50,7 +50,7 @@ impl AuthSerivce {
         match self.send_verification_email(&user) {
             Ok(..) => Ok(user),
             Err(err) => {
-                self.users_svc.delete_user(user)?;
+                self.users_svc.delete(user)?;
                 Err(err)
             }
         }
@@ -121,7 +121,7 @@ impl AuthSerivce {
             }
 
             if conf.user_id == user.id && is_valid_func(&conf) {
-                self.users_svc.activate_user(user);
+                self.users_svc.activate(user);
                 self.confirmations_svc.delete(conf)?;
 
                 return Ok(());
