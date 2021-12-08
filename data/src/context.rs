@@ -1,5 +1,5 @@
 use crate::repos::*;
-use crate::result::{DataError, Result};
+use crate::result::Result;
 
 #[derive(Clone)]
 pub struct DbContext {
