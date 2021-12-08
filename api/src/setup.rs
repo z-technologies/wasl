@@ -2,7 +2,7 @@ use crate::handlers::{auth, echo, services};
 use crate::settings::Settings;
 
 use business::services::*;
-use data::context::{create_connection_pool, DbContext};
+use data::context::PostgresConnection;
 
 use actix_web::web;
 
@@ -25,28 +25,22 @@ pub fn setup_handlers(cfg: &mut web::ServiceConfig) {
 }
 
 pub fn setup_data(cfg: &mut web::ServiceConfig, settings: Arc<Settings>) {
-    // create database context
-    let pool = create_connection_pool(
-        &settings.database.url(),
-        settings.database.max_pool_connections,
-    )
-    .expect("could not create a database pool");
-    let ctx = DbContext::new(pool);
+    let conn = PostgresConnection::new(&settings.database.url())
+        .expect("could not create a database connection");
 
     // create services
     let email_svc = Arc::new(EmailService::new(&settings.email).unwrap());
-    let users_svc = Arc::new(UsersService::new(ctx.clone()));
-    let confirmations_svc = Arc::new(ConfirmationsService::new(ctx.clone()));
+    let users_svc = Arc::new(UsersService::new(conn.clone()));
+    let confirmations_svc = Arc::new(ConfirmationsService::new(conn.clone()));
     let auth_svc = Arc::new(AuthSerivce::new(
         users_svc.clone(),
         confirmations_svc.clone(),
         email_svc.clone(),
     ));
-    let services_svc = Arc::new(ServicesService::new(ctx.clone()));
+    let services_svc = Arc::new(ServicesService::new(conn.clone()));
 
     // export data
     cfg.data(settings.clone())
-        .data(ctx)
         .data(email_svc)
         .data(users_svc)
         .data(confirmations_svc)
