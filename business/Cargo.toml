@@ -4,8 +4,6 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-data = { path = "../data" }
-
 base64      = "0.13.0"
 chrono      = "0.4"
 derive_more = "0.99"
