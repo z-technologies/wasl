@@ -1,7 +1,7 @@
 use crate::handlers::{auth, echo};
 use crate::settings::Settings;
 
-use business::services::{AuthSerivce, EmailService};
+use business::services::*;
 use data::context::{create_connection_pool, DbContext};
 
 use actix_web::web;
@@ -35,12 +35,14 @@ pub fn setup_data(cfg: &mut web::ServiceConfig, settings: Arc<Settings>) {
     // create services
     let email_svc = Arc::new(EmailService::new(&settings.email).unwrap());
     let auth_svc = Arc::new(AuthSerivce::new(ctx.clone(), email_svc.clone()));
+    let services_svc = Arc::new(ServicesService::new(ctx.clone()));
 
     // export data
     cfg.data(settings.clone())
         .data(ctx)
         .data(auth_svc)
-        .data(email_svc);
+        .data(email_svc)
+        .data(services_svc);
 }
 
 pub fn setup_logging() {
