@@ -1,7 +1,10 @@
 use crate::auth::{groups::AuthGroup, token::Claims};
 use crate::result::{ApiError, Result};
-use actix_web::FromRequest;
 
+use data::context::DbContext;
+use data::models::User;
+
+use actix_web::{web, FromRequest};
 use std::future::{ready, Ready};
 
 pub struct Identity(Claims);
@@ -53,6 +56,14 @@ impl Identity {
         } else {
             Err(ApiError::PermissionDenied)
         }
+    }
+
+    pub async fn user(self, ctx: DbContext) -> Result<User> {
+        Ok(
+            web::block(move || ctx.users().get_by_username(&self.0.username))
+                .await
+                .unwrap(),
+        )
     }
 }
 
