@@ -57,7 +57,8 @@ impl ResponseError for ApiError {
                 }
                 UserError::NotFound => StatusCode::NOT_FOUND,
                 UserError::InvalidConfirmationDetails => StatusCode::FORBIDDEN,
-                UserError::InvalidUsernameOrPassword => {
+                UserError::PermissionDenied
+                | UserError::InvalidUsernameOrPassword => {
                     StatusCode::UNAUTHORIZED
                 }
                 UserError::UsernameAlreadyInUse

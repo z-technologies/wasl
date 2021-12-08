@@ -63,6 +63,9 @@ pub enum UserError {
     #[display(fmt = "not found")]
     NotFound,
 
+    #[display(fmt = "permission denied")]
+    PermissionDenied,
+
     #[display(fmt = "could not update account info")]
     CouldNotUpdateAccount,
 
