@@ -1,11 +1,13 @@
 use crate::auth::{groups::AuthGroup, token::Claims};
 use crate::result::{ApiError, Result};
 
-use data::context::DbContext;
+use business::services::UsersService;
 use data::models::User;
 
 use actix_web::{web, FromRequest};
+
 use std::future::{ready, Ready};
+use std::sync::Arc;
 
 pub struct Identity(Claims);
 
@@ -58,9 +60,9 @@ impl Identity {
         }
     }
 
-    pub async fn user(self, ctx: DbContext) -> Result<User> {
+    pub async fn user<'a>(self, users_svc: Arc<UsersService>) -> Result<User> {
         Ok(
-            web::block(move || ctx.users().get_by_username(&self.0.username))
+            web::block(move || users_svc.get_by_username(&self.0.username))
                 .await
                 .unwrap(),
         )
