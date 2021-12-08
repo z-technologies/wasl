@@ -6,7 +6,7 @@ use wasl::data::models::{KeyType, NewService, User};
 use wasl::services::ServicesService;
 use wasl::services::UsersService;
 
-use actix_web::{get, post, web, HttpResponse};
+use actix_web::{delete, get, post, web, HttpResponse};
 use serde::Deserialize;
 
 use std::sync::Arc;
@@ -41,6 +41,26 @@ pub async fn add(
     .await?;
 
     Ok(HttpResponse::Ok().json(svc))
+}
+
+#[delete("/{id}")]
+pub async fn delete(
+    auth: Identity,
+    id: web::Path<KeyType>,
+    services_svc: web::Data<ServicesService>,
+    users_svc: web::Data<Arc<UsersService>>,
+) -> Result<HttpResponse> {
+    auth.has(AuthGroup::Provider)?;
+
+    let user = auth.user(users_svc.get_ref().clone()).await?;
+
+    web::block(move || {
+        let service = services_svc.get_ref().get_service_by_id(id.0)?;
+        services_svc.get_ref().delete(service, &user)
+    })
+    .await?;
+
+    Ok(HttpResponse::Ok().finish())
 }
 
 #[derive(Deserialize)]
