@@ -2,21 +2,29 @@ use crate::result::{Result, UserError};
 use crate::security::password::is_match;
 use crate::security::random::generate_alphanum_string;
 use crate::services::email::{make_mail_box, EmailService};
+use crate::services::{ConfirmationsService, UsersService};
 
-use data::context::DbContext;
 use data::models::{Confirmation, Group, NewConfirmation, NewUser, User};
-use data::repos::Repo;
 
 use std::sync::Arc;
 
 pub struct AuthSerivce {
-    ctx: DbContext,
+    users_svc: Arc<UsersService>,
+    confirmations_svc: Arc<ConfirmationsService>,
     email_svc: Arc<EmailService>,
 }
 
 impl AuthSerivce {
-    pub fn new(ctx: DbContext, email_svc: Arc<EmailService>) -> AuthSerivce {
-        AuthSerivce { ctx, email_svc }
+    pub fn new(
+        users_svc: Arc<UsersService>,
+        confirmations_svc: Arc<ConfirmationsService>,
+        email_svc: Arc<EmailService>,
+    ) -> AuthSerivce {
+        AuthSerivce {
+            users_svc,
+            confirmations_svc,
+            email_svc,
+        }
     }
 
     pub fn signin<'a>(
@@ -24,33 +32,25 @@ impl AuthSerivce {
         username: &'a str,
         password: &'a str,
     ) -> Result<(User, Vec<Group>)> {
-        let user = self.ctx.users().get_by_username(username)?;
+        let user = self.users_svc.get_by_username(username)?;
 
         if !user.is_active {
             Err(UserError::NotFound)
         } else if !is_match(password, &user.password_hash)? {
             Err(UserError::InvalidUsernameOrPassword)
         } else {
-            let groups = self.ctx.users().get_user_groups(&user)?;
+            let groups = self.users_svc.get_user_groups(&user)?;
             Ok((user, groups))
         }
     }
 
     pub fn signup<'a>(&self, new_user: &'a NewUser) -> Result<User> {
-        if self.ctx.users().duplicate_username(&new_user.username)? {
-            return Err(UserError::UsernameAlreadyInUse);
-        }
-
-        if self.ctx.users().duplicate_email(&new_user.email)? {
-            return Err(UserError::EmailAlreadyInUse);
-        }
-
-        let user = self.ctx.users().add(new_user)?;
+        let user = self.users_svc.create(new_user)?;
 
         match self.send_verification_email(&user) {
             Ok(..) => Ok(user),
             Err(err) => {
-                self.ctx.users().remove(user)?;
+                self.users_svc.delete_user(user)?;
                 Err(err)
             }
         }
@@ -61,12 +61,12 @@ impl AuthSerivce {
         username: &str,
         token: &str,
     ) -> Result<()> {
-        let conf = self.ctx.confirmations().get_by_token(token)?;
+        let conf = self.confirmations_svc.get_by_token(token)?;
         Ok(self.activate_user(username, conf, |c| c.token == token)?)
     }
 
     pub fn activate_with_otp(&self, username: &str, otp: &str) -> Result<()> {
-        let conf = self.ctx.confirmations().get_by_otp(otp)?;
+        let conf = self.confirmations_svc.get_by_otp(otp)?;
         Ok(self.activate_user(username, conf, |c| c.otp == otp)?)
     }
 
@@ -81,7 +81,7 @@ impl AuthSerivce {
         );
 
         if let Err(err) = ret {
-            self.ctx.confirmations().remove(conf)?;
+            self.confirmations_svc.delete(conf)?;
             return Err(err);
         }
 
@@ -101,7 +101,7 @@ impl AuthSerivce {
             expires_at: chrono::Utc::now() + valid_for,
         };
 
-        Ok(self.ctx.confirmations().add(&conf)?)
+        Ok(self.confirmations_svc.create(&conf)?)
     }
 
     fn activate_user<F>(
@@ -113,7 +113,7 @@ impl AuthSerivce {
     where
         F: Fn(&Confirmation) -> bool,
     {
-        let mut user = self.ctx.users().get_by_username(username)?;
+        let mut user = self.users_svc.get_by_username(username)?;
 
         if let Some(conf) = conf {
             if user.is_active {
@@ -121,10 +121,8 @@ impl AuthSerivce {
             }
 
             if conf.user_id == user.id && is_valid_func(&conf) {
-                user.is_active = true;
-
-                self.ctx.confirmations().remove(conf)?;
-                self.ctx.users().update(user)?;
+                self.users_svc.activate_user(user);
+                self.confirmations_svc.delete(conf)?;
 
                 return Ok(());
             }
