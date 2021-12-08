@@ -20,7 +20,11 @@ pub fn setup_handlers(cfg: &mut web::ServiceConfig) {
                     .service(auth::activate_with_token)
                     .service(auth::activate_with_otp),
             )
-            .service(web::scope("/services").service(services::get))
+            .service(
+                web::scope("/services")
+                    .service(services::get)
+                    .service(services::add),
+            )
     });
 }
 
