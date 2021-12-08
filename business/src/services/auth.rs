@@ -26,10 +26,10 @@ impl AuthSerivce {
         }
     }
 
-    pub fn signin<'a>(
+    pub fn signin(
         &self,
-        username: &'a str,
-        password: &'a str,
+        username: &str,
+        password: &str,
     ) -> Result<(User, Vec<Group>)> {
         let user = self.users_svc.get_by_username(username)?;
 
@@ -43,7 +43,7 @@ impl AuthSerivce {
         }
     }
 
-    pub fn signup<'a>(&self, new_user: &'a NewUser) -> Result<User> {
+    pub fn signup(&self, new_user: &NewUser) -> Result<User> {
         let user = self.users_svc.create(new_user)?;
 
         match self.send_verification_email(&user) {
