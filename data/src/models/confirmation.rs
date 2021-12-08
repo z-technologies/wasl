@@ -36,13 +36,3 @@ pub struct NewConfirmation {
     pub issued_at: chrono::DateTime<chrono::Utc>,
     pub expires_at: chrono::DateTime<chrono::Utc>,
 }
-
-// TODO:
-// Find a better solution to update problems that this
-impl Identifiable for Confirmation {
-    type Id = KeyType;
-
-    fn id(self) -> Self::Id {
-        self.id
-    }
-}

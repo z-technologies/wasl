@@ -58,13 +58,3 @@ pub struct UserGroup {
     pub user_id: KeyType,
     pub group_id: KeyType,
 }
-
-// TODO:
-// Find a better solution to update problems that this
-impl Identifiable for User {
-    type Id = KeyType;
-
-    fn id(self) -> Self::Id {
-        self.id
-    }
-}
