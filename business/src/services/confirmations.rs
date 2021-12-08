@@ -1,10 +1,9 @@
-use crate::result::Result;
+use crate::result::{Result, UserError};
 use crate::security::random::generate_alphanum_string;
-use data::models::User;
 
 use data::connection::*;
 use data::diesel::prelude::*;
-use data::models::{Confirmation, NewConfirmation};
+use data::models::{Confirmation, NewConfirmation, User};
 
 pub struct ConfirmationsService {
     conn: PostgresConnection,
@@ -15,32 +14,28 @@ impl ConfirmationsService {
         ConfirmationsService { conn }
     }
 
-    pub fn get_by_token(&self, t: &str) -> Result<Option<Confirmation>> {
+    pub fn get_by_token(&self, t: &str) -> Result<Confirmation> {
         use data::schema::confirmations::dsl::*;
 
-        // TODO:
-        // Rethink option
-
-        Ok(data::result::adapt(
+        data::result::adapt(
             confirmations
                 .filter(token.eq(t))
                 .first::<Confirmation>(&self.conn.get()?)
                 .optional(),
-        )?)
+        )?
+        .ok_or(UserError::InvalidConfirmationDetails)
     }
 
-    pub fn get_by_otp(&self, o: &str) -> Result<Option<Confirmation>> {
+    pub fn get_by_otp(&self, o: &str) -> Result<Confirmation> {
         use data::schema::confirmations::dsl::*;
 
-        // TODO:
-        // Rethink option
-
-        Ok(data::result::adapt(
+        data::result::adapt(
             confirmations
                 .filter(otp.eq(o))
                 .first::<Confirmation>(&self.conn.get()?)
                 .optional(),
-        )?)
+        )?
+        .ok_or(UserError::InvalidConfirmationDetails)
     }
 
     pub fn create(&self, new_conf: &NewConfirmation) -> Result<Confirmation> {

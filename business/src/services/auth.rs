@@ -1,10 +1,9 @@
 use crate::result::{Result, UserError};
 use crate::security::password::is_match;
-use crate::security::random::generate_alphanum_string;
 use crate::services::email::{make_mail_box, EmailService};
 use crate::services::{ConfirmationsService, UsersService};
 
-use data::models::{Confirmation, Group, NewConfirmation, NewUser, User};
+use data::models::{Confirmation, Group, NewUser, User};
 
 use std::sync::Arc;
 
@@ -56,20 +55,6 @@ impl AuthSerivce {
         }
     }
 
-    pub fn activate_with_token(
-        &self,
-        username: &str,
-        token: &str,
-    ) -> Result<()> {
-        let conf = self.confirmations_svc.get_by_token(token)?;
-        Ok(self.activate_user(username, conf, |c| c.token == token)?)
-    }
-
-    pub fn activate_with_otp(&self, username: &str, otp: &str) -> Result<()> {
-        let conf = self.confirmations_svc.get_by_otp(otp)?;
-        Ok(self.activate_user(username, conf, |c| c.otp == otp)?)
-    }
-
     fn send_verification_email(&self, user: &User) -> Result<()> {
         let conf = self
             .confirmations_svc
@@ -89,10 +74,24 @@ impl AuthSerivce {
         Ok(())
     }
 
+    pub fn activate_with_token(
+        &self,
+        username: &str,
+        token: &str,
+    ) -> Result<()> {
+        let conf = self.confirmations_svc.get_by_token(token)?;
+        Ok(self.activate_user(username, conf, |c| c.token == token)?)
+    }
+
+    pub fn activate_with_otp(&self, username: &str, otp: &str) -> Result<()> {
+        let conf = self.confirmations_svc.get_by_otp(otp)?;
+        Ok(self.activate_user(username, conf, |c| c.otp == otp)?)
+    }
+
     fn activate_user<F>(
         &self,
         username: &str,
-        conf: Option<Confirmation>,
+        conf: Confirmation,
         is_valid_func: F,
     ) -> Result<()>
     where
@@ -100,20 +99,18 @@ impl AuthSerivce {
     {
         let user = self.users_svc.get_by_username(username)?;
 
-        if let Some(conf) = conf {
-            if user.is_active {
-                return Err(UserError::CouldNotUpdateAccount);
-            }
-
-            if conf.user_id == user.id && is_valid_func(&conf) {
-                self.users_svc.activate(user)?;
-                self.confirmations_svc.delete(conf)?;
-
-                return Ok(());
-            }
+        if user.is_active {
+            return Err(UserError::CouldNotUpdateAccount);
         }
 
-        return Err(UserError::InvalidConfirmationDetails);
+        if conf.user_id == user.id && is_valid_func(&conf) {
+            self.users_svc.activate(user)?;
+            self.confirmations_svc.delete(conf)?;
+
+            return Ok(());
+        }
+
+        Err(UserError::InvalidConfirmationDetails)
     }
 }
 
