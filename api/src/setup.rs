@@ -35,14 +35,22 @@ pub fn setup_data(cfg: &mut web::ServiceConfig, settings: Arc<Settings>) {
 
     // create services
     let email_svc = Arc::new(EmailService::new(&settings.email).unwrap());
-    let auth_svc = Arc::new(AuthSerivce::new(ctx.clone(), email_svc.clone()));
+    let users_svc = Arc::new(UsersService::new(ctx.clone()));
+    let confirmations_svc = Arc::new(ConfirmationsService::new(ctx.clone()));
+    let auth_svc = Arc::new(AuthSerivce::new(
+        users_svc.clone(),
+        confirmations_svc.clone(),
+        email_svc.clone(),
+    ));
     let services_svc = Arc::new(ServicesService::new(ctx.clone()));
 
     // export data
     cfg.data(settings.clone())
         .data(ctx)
-        .data(auth_svc)
         .data(email_svc)
+        .data(users_svc)
+        .data(confirmations_svc)
+        .data(auth_svc)
         .data(services_svc);
 }
 
