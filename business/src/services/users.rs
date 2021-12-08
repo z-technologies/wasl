@@ -1,6 +1,9 @@
 use crate::result::Result;
+use crate::result::UserError;
+
 use data::diesel::BelongingToDsl;
 use data::models::Group;
+use data::models::NewUser;
 use data::models::User;
 use data::models::UserGroup;
 
@@ -30,6 +33,27 @@ impl UsersService {
         use data::schema::users::dsl::*;
 
         Ok(self.ctx.users().first(email.eq(em))?)
+    }
+
+    pub fn create(&self, new_user: &NewUser) -> Result<User> {
+        if self.duplicate_username(&new_user.username)? {
+            return Err(UserError::UsernameAlreadyInUse);
+        }
+
+        if self.duplicate_email(&new_user.email)? {
+            return Err(UserError::EmailAlreadyInUse);
+        }
+
+        Ok(self.ctx.users().add(new_user)?)
+    }
+
+    pub fn activate_user(&self, mut user: User) -> Result<User> {
+        user.is_active = true;
+        Ok(self.ctx.users().update(user)?)
+    }
+
+    pub fn delete_user(&self, user: User) -> Result<usize> {
+        Ok(self.ctx.users().remove(user)?)
     }
 
     pub fn duplicate_username(&self, uname: &str) -> Result<bool> {
