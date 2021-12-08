@@ -1,6 +1,6 @@
 use crate::data::connection::*;
-use crate::data::models::{KeyType, NewService, Service};
-use crate::result::Result;
+use crate::data::models::{KeyType, NewService, Service, User};
+use crate::result::{Result, UserError};
 
 use diesel::prelude::*;
 
@@ -25,5 +25,13 @@ impl ServicesService {
         Ok(diesel::insert_into(services)
             .values(new_service)
             .get_result(&self.conn.get()?)?)
+    }
+
+    pub fn delete(&self, service: Service, for_user: &User) -> Result<usize> {
+        if service.user_id != for_user.id {
+            return Err(UserError::PermissionDenied);
+        }
+
+        Ok(diesel::delete(&service).execute(&self.conn.get()?)?)
     }
 }
