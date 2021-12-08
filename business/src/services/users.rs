@@ -17,17 +17,25 @@ impl UsersService {
     pub fn get_by_username(&self, uname: &str) -> Result<User> {
         use data::schema::users::dsl::*;
 
-        Ok(data::result::adapt(
-            users.filter(username.eq(uname)).first(&self.conn.get()?),
-        )?)
+        data::result::adapt(
+            users
+                .filter(username.eq(uname))
+                .first(&self.conn.get()?)
+                .optional(),
+        )?
+        .ok_or(UserError::NotFound)
     }
 
     pub fn get_by_email(&self, em: &str) -> Result<User> {
         use data::schema::users::dsl::*;
 
-        Ok(data::result::adapt(
-            users.filter(email.eq(em)).first(&self.conn.get()?),
-        )?)
+        data::result::adapt(
+            users
+                .filter(email.eq(em))
+                .first(&self.conn.get()?)
+                .optional(),
+        )?
+        .ok_or(UserError::NotFound)
     }
 
     pub fn duplicate_username(&self, uname: &str) -> Result<bool> {
