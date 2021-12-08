@@ -86,7 +86,10 @@ impl From<std::env::VarError> for UserError {
 
 impl From<DataError> for UserError {
     fn from(err: DataError) -> Self {
-        UserError::InternalError(InternalError::DataError(err))
+        match err {
+            DataError::NotFound => UserError::NotFound,
+            _ => UserError::InternalError(InternalError::DataError(err)),
+        }
     }
 }
 
