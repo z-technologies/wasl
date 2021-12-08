@@ -71,8 +71,9 @@ impl AuthSerivce {
     }
 
     fn send_verification_email(&self, user: &User) -> Result<()> {
-        let conf =
-            self.create_confirmation(user, chrono::Duration::minutes(30))?;
+        let conf = self
+            .confirmations_svc
+            .generate_for::<8, 64>(user, chrono::Duration::minutes(30))?;
 
         let ret = self.email_svc.send_noreply(
             "Account Confirmation",
@@ -86,22 +87,6 @@ impl AuthSerivce {
         }
 
         Ok(())
-    }
-
-    fn create_confirmation(
-        &self,
-        user: &User,
-        valid_for: chrono::Duration,
-    ) -> Result<Confirmation> {
-        let conf = NewConfirmation {
-            user_id: user.id,
-            otp: generate_alphanum_string::<8>(),
-            token: generate_alphanum_string::<64>(),
-            issued_at: chrono::Utc::now(),
-            expires_at: chrono::Utc::now() + valid_for,
-        };
-
-        Ok(self.confirmations_svc.create(&conf)?)
     }
 
     fn activate_user<F>(

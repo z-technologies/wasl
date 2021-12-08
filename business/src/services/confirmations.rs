@@ -1,4 +1,6 @@
 use crate::result::Result;
+use crate::security::random::generate_alphanum_string;
+use data::models::User;
 
 use data::connection::*;
 use data::diesel::prelude::*;
@@ -55,5 +57,21 @@ impl ConfirmationsService {
         Ok(data::result::adapt(
             data::diesel::delete(&conf).execute(&self.conn.get()?),
         )?)
+    }
+
+    pub fn generate_for<const OTP_LEN: usize, const TOKEN_LEN: usize>(
+        &self,
+        user: &User,
+        valid_for: chrono::Duration,
+    ) -> Result<Confirmation> {
+        let conf = NewConfirmation {
+            user_id: user.id,
+            otp: generate_alphanum_string::<OTP_LEN>(),
+            token: generate_alphanum_string::<TOKEN_LEN>(),
+            issued_at: chrono::Utc::now(),
+            expires_at: chrono::Utc::now() + valid_for,
+        };
+
+        Ok(self.create(&conf)?)
     }
 }
