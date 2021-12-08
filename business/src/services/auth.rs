@@ -26,21 +26,14 @@ impl AuthSerivce {
     ) -> Result<(User, Vec<Group>)> {
         let user = self.ctx.users().get_by_username(username)?;
 
-        if let Some(user) = user {
-            if !user.is_active {
-                return Err(UserError::NotFound);
-            }
-
+        if !user.is_active {
+            Err(UserError::NotFound)
+        } else if !is_match(password, &user.password_hash)? {
+            Err(UserError::InvalidUsernameOrPassword)
+        } else {
             let groups = self.ctx.users().get_user_groups(&user)?;
-
-            return if is_match(password, &user.password_hash)? {
-                Ok((user, groups))
-            } else {
-                Err(UserError::InvalidUsernameOrPassword)
-            };
+            Ok((user, groups))
         }
-
-        return Err(UserError::InvalidUsernameOrPassword);
     }
 
     pub fn signup<'a>(&self, new_user: &'a NewUser) -> Result<User> {
@@ -52,12 +45,12 @@ impl AuthSerivce {
             return Err(UserError::EmailAlreadyInUse);
         }
 
-        let user = self.ctx.users().insert(&new_user)?;
+        let user = self.ctx.users().add(new_user)?;
 
         match self.send_verification_email(&user) {
             Ok(..) => Ok(user),
             Err(err) => {
-                self.ctx.users().delete(&user)?;
+                self.ctx.users().remove(user)?;
                 Err(err)
             }
         }
@@ -88,7 +81,7 @@ impl AuthSerivce {
         );
 
         if let Err(err) = ret {
-            self.ctx.confirmations().delete(&conf)?;
+            self.ctx.confirmations().remove(conf)?;
             return Err(err);
         }
 
@@ -108,7 +101,7 @@ impl AuthSerivce {
             expires_at: chrono::Utc::now() + valid_for,
         };
 
-        Ok(self.ctx.confirmations().insert(&conf)?)
+        Ok(self.ctx.confirmations().add(&conf)?)
     }
 
     fn activate_user<F>(
@@ -120,10 +113,7 @@ impl AuthSerivce {
     where
         F: Fn(&Confirmation) -> bool,
     {
-        let mut user = match self.ctx.users().get_by_username(username)? {
-            Some(user) => user,
-            None => return Err(UserError::NotFound),
-        };
+        let mut user = self.ctx.users().get_by_username(username)?;
 
         if let Some(conf) = conf {
             if user.is_active {
@@ -133,8 +123,8 @@ impl AuthSerivce {
             if conf.user_id == user.id && is_valid_func(&conf) {
                 user.is_active = true;
 
-                self.ctx.confirmations().delete(&conf)?;
-                self.ctx.users().update(&user)?;
+                self.ctx.confirmations().remove(conf)?;
+                self.ctx.users().update(user)?;
 
                 return Ok(());
             }
