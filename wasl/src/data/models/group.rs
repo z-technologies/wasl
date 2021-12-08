@@ -1,6 +1,6 @@
-use crate::models::validate::RE_PACKAGE;
-use crate::models::KeyType;
-use crate::schema::groups;
+use crate::data::models::validate::RE_PACKAGE;
+use crate::data::models::KeyType;
+use crate::data::schema::groups;
 
 use serde::{Deserialize, Serialize};
 use validator::Validate;

@@ -1,5 +1,5 @@
-use crate::models::{KeyType, User};
-use crate::schema::services;
+use crate::data::models::{KeyType, User};
+use crate::data::schema::services;
 
 use serde::{Deserialize, Serialize};
 

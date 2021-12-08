@@ -1,5 +1,5 @@
-use crate::models::{KeyType, User};
-use crate::schema::confirmations;
+use crate::data::models::{KeyType, User};
+use crate::data::schema::confirmations;
 
 use diesel::Identifiable;
 use serde::{Deserialize, Serialize};
