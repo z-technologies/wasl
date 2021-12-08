@@ -3,15 +3,13 @@ use crate::result::Result;
 
 use diesel::{
     associations::HasTable,
-    expression::{exists::Exists, subselect::ValidSubselect},
-    helper_types::{Filter, Find, Select, Update},
+    helper_types::{Filter, Find, Limit, Select, Update},
     prelude::*,
     query_builder::{
         AsChangeset, DeleteStatement, InsertStatement, IntoUpdateTarget,
-        QueryFragment, QueryId, SelectQuery,
     },
     query_dsl::{
-        methods::{ExecuteDsl, FilterDsl, FindDsl, SelectDsl},
+        methods::{ExecuteDsl, FilterDsl, FindDsl, LimitDsl, SelectDsl},
         LoadQuery,
     },
     r2d2::{ConnectionManager, Pool, PooledConnection},
@@ -37,6 +35,17 @@ where
             .get_result(&self.get_connection()?)?)
     }
 
+    fn first<E>(&self, exp: E) -> Result<M>
+    where
+        M::Table: FilterDsl<E>,
+        Filter<M::Table, E>: LimitDsl,
+        Limit<Filter<M::Table, E>>: LoadQuery<DbPooledConnection, M>,
+    {
+        Ok(QueryDsl::filter(M::table(), exp)
+            .limit(1)
+            .get_result(&self.get_connection()?)?)
+    }
+
     fn get_all(&self) -> Result<Vec<M>>
     where
         M::Table: SelectDsl<<M::Table as Table>::AllColumns>,
@@ -57,20 +66,20 @@ where
             .get_result(&self.get_connection()?)?)
     }
 
-    fn remove(&self, id: KeyType) -> Result<usize>
+    fn remove(&self, item: M) -> Result<usize>
     where
-        M::Table: FindDsl<KeyType>,
-        Find<M::Table, KeyType>: IntoUpdateTarget,
-        DeleteFindStatement<Find<M::Table, KeyType>>:
+        M: Identifiable,
+        M::Table: FindDsl<M::Id>,
+        Find<M::Table, M::Id>: IntoUpdateTarget,
+        DeleteFindStatement<Find<M::Table, M::Id>>:
             ExecuteDsl<DbPooledConnection>,
     {
-        Ok(diesel::delete(QueryDsl::find(M::table(), id))
+        Ok(diesel::delete(QueryDsl::find(M::table(), item.id()))
             .execute(&self.get_connection()?)?)
     }
 
     fn update(&self, item: M) -> Result<M>
     where
-        M: IntoUpdateTarget,
         M: IntoUpdateTarget + AsChangeset<Target = M::Table>,
         Update<M, M>: LoadQuery<DbPooledConnection, M>,
     {
@@ -79,25 +88,12 @@ where
             .get_result(&self.get_connection()?)?)
     }
 
-    fn filter<E: BooleanExpression>(&self, exp: E) -> Result<Vec<M>>
+    fn filter<E>(&self, exp: E) -> Result<Vec<M>>
     where
         M::Table: FilterDsl<E>,
         Filter<M::Table, E>: LoadQuery<DbPooledConnection, M>,
     {
         Ok(QueryDsl::filter(M::table(), exp).load(&self.get_connection()?)?)
-    }
-
-    fn any<E: BooleanExpression>(&self, exp: E) -> Result<bool>
-    where
-        M::Table: FilterDsl<E>,
-        Filter<M::Table, E>: SelectQuery + ValidSubselect<()> + QueryId,
-        Exists<Filter<M::Table, E>>: SelectDsl<Exists<Filter<M::Table, E>>>
-            + QueryFragment<<DbConnection as Connection>::Backend>,
-    {
-        use diesel::dsl::*;
-
-        Ok(select(exists(QueryDsl::filter(M::table(), exp)))
-            .get_result(&self.get_connection()?)?)
     }
 
     fn get_connection(&self) -> Result<DbPooledConnection>;
@@ -107,8 +103,3 @@ type DeleteFindStatement<F> = DeleteStatement<
     <F as HasTable>::Table,
     <F as IntoUpdateTarget>::WhereClause,
 >;
-
-pub trait BooleanExpression:
-    diesel::Expression<SqlType = diesel::sql_types::Bool>
-{
-}
