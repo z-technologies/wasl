@@ -24,6 +24,9 @@ impl ConfirmationsService {
     pub fn get_by_token(&self, t: &str) -> Result<Confirmation> {
         use data::schema::confirmations::dsl::*;
 
+        // TODO:
+        // Properly handle NotFound error
+
         data::result::adapt(
             confirmations
                 .filter(token.eq(t))
@@ -35,6 +38,9 @@ impl ConfirmationsService {
 
     pub fn get_by_otp(&self, o: &str) -> Result<Confirmation> {
         use data::schema::confirmations::dsl::*;
+
+        // TODO:
+        // Properly handle NotFound error
 
         data::result::adapt(
             confirmations
