@@ -11,22 +11,16 @@ pub struct UsersRepo {
 }
 
 impl UsersRepo {
-    pub fn get_by_username(&self, uname: &str) -> Result<Option<User>> {
+    pub fn get_by_username(&self, uname: &str) -> Result<User> {
         use crate::schema::users::dsl::*;
 
-        Ok(users
-            .filter(username.eq(uname))
-            .first(&self.get_connection()?)
-            .optional()?)
+        Ok(self.first(username.eq(uname))?)
     }
 
-    pub fn get_by_email(&self, em: &str) -> Result<Option<User>> {
+    pub fn get_by_email(&self, em: &str) -> Result<User> {
         use crate::schema::users::dsl::*;
 
-        Ok(users
-            .filter(email.eq(em))
-            .first(&self.get_connection()?)
-            .optional()?)
+        Ok(self.first(email.eq(em))?)
     }
 
     pub fn duplicate_username(&self, uname: &str) -> Result<bool> {
