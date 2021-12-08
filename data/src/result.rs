@@ -10,6 +10,9 @@ pub enum DataError {
 
     #[display(fmt = "connection pool: {:?}", _0)]
     ConnectionPoolError(diesel::r2d2::PoolError),
+
+    #[display(fmt = "not found")]
+    NotFound,
 }
 
 pub type Result<T> = std::result::Result<T, DataError>;
