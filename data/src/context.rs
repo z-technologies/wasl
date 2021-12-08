@@ -1,58 +1,34 @@
-use crate::repos::*;
 use crate::result::Result;
 
+use diesel::r2d2::{ConnectionManager, Pool, PooledConnection};
+use diesel::PgConnection;
+
+pub use diesel::Connection;
+
+pub trait DatabaseConnection {
+    type Conn;
+
+    fn get(&self) -> Result<Self::Conn>;
+}
+
 #[derive(Clone)]
-pub struct DbContext {
-    users: UsersRepo,
-    groups: GroupsRepo,
-    confirmations: ConfirmationsRepo,
-    services: ServicesRepo,
-    products: ProductsRepo,
-    pool: DbPool,
+pub struct PostgresConnection {
+    pool: Pool<ConnectionManager<PgConnection>>,
 }
 
-impl DbContext {
-    pub fn new(pool: DbPool) -> DbContext {
-        DbContext {
-            users: UsersRepo { pool: pool.clone() },
-            confirmations: ConfirmationsRepo { pool: pool.clone() },
-            groups: GroupsRepo { pool: pool.clone() },
-            services: ServicesRepo { pool: pool.clone() },
-            products: ProductsRepo { pool: pool.clone() },
-            pool,
-        }
-    }
+impl PostgresConnection {
+    pub fn new(url: &str) -> Result<PostgresConnection> {
+        let manager = ConnectionManager::<PgConnection>::new(url);
+        let pool = Pool::builder().build(manager)?;
 
-    pub fn users(&self) -> &UsersRepo {
-        &self.users
-    }
-
-    pub fn confirmations(&self) -> &ConfirmationsRepo {
-        &self.confirmations
-    }
-
-    pub fn groups(&self) -> &GroupsRepo {
-        &self.groups
-    }
-
-    pub fn services(&self) -> &ServicesRepo {
-        &self.services
-    }
-
-    pub fn products(&self) -> &ProductsRepo {
-        &self.products
-    }
-
-    pub fn pool(&self) -> DbPool {
-        self.pool.clone()
+        Ok(PostgresConnection { pool })
     }
 }
 
-pub fn create_connection_pool(
-    url: &str,
-    max_connections: u32,
-) -> Result<DbPool> {
-    let manager = DbConnectionManager::new(url);
+impl DatabaseConnection for PostgresConnection {
+    type Conn = PooledConnection<ConnectionManager<PgConnection>>;
 
-    Ok(DbPool::builder().max_size(max_connections).build(manager)?)
+    fn get(&self) -> Result<Self::Conn> {
+        Ok(self.pool.get()?)
+    }
 }
