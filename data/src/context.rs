@@ -8,6 +8,7 @@ pub struct DbContext {
     confirmations: ConfirmationsRepo,
     services: ServicesRepo,
     products: ProductsRepo,
+    pool: DbPool,
 }
 
 impl DbContext {
@@ -18,6 +19,7 @@ impl DbContext {
             groups: GroupsRepo { pool: pool.clone() },
             services: ServicesRepo { pool: pool.clone() },
             products: ProductsRepo { pool: pool.clone() },
+            pool,
         }
     }
 
@@ -39,6 +41,10 @@ impl DbContext {
 
     pub fn products(&self) -> &ProductsRepo {
         &self.products
+    }
+
+    pub fn pool(&self) -> DbPool {
+        self.pool.clone()
     }
 }
 
