@@ -22,6 +22,7 @@ table! {
         title -> Varchar,
         description -> Varchar,
         available_quantity -> Int4,
+        user_id -> Int4,
     }
 }
 
@@ -32,6 +33,7 @@ table! {
         description -> Varchar,
         available_begin -> Nullable<Time>,
         available_end -> Nullable<Time>,
+        user_id -> Int4,
     }
 }
 
@@ -59,6 +61,8 @@ table! {
 }
 
 joinable!(confirmations -> users (user_id));
+joinable!(products -> users (user_id));
+joinable!(services -> users (user_id));
 joinable!(user_groups -> groups (group_id));
 joinable!(user_groups -> users (user_id));
 
