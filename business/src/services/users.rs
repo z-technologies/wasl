@@ -38,7 +38,7 @@ impl UsersService {
         .ok_or(UserError::NotFound)
     }
 
-    pub fn duplicate_username(&self, uname: &str) -> Result<bool> {
+    pub fn username_exists(&self, uname: &str) -> Result<bool> {
         use data::diesel::dsl::*;
         use data::schema::users::dsl::*;
 
@@ -48,7 +48,7 @@ impl UsersService {
         )?)
     }
 
-    pub fn duplicate_email(&self, em: &str) -> Result<bool> {
+    pub fn email_exists(&self, em: &str) -> Result<bool> {
         use data::diesel::dsl::*;
         use data::schema::users::dsl::*;
 
@@ -75,11 +75,11 @@ impl UsersService {
     pub fn create(&self, new_user: &NewUser) -> Result<User> {
         use data::schema::users::dsl::*;
 
-        if self.duplicate_username(&new_user.username)? {
+        if self.username_exists(&new_user.username)? {
             return Err(UserError::UsernameAlreadyInUse);
         }
 
-        if self.duplicate_email(&new_user.email)? {
+        if self.email_exists(&new_user.email)? {
             return Err(UserError::EmailAlreadyInUse);
         }
 
