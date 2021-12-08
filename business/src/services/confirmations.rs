@@ -1,31 +1,62 @@
 use crate::result::Result;
 
-use data::context::DbContext;
+use data::context::*;
+use data::diesel::prelude::*;
 use data::models::{Confirmation, NewConfirmation};
-use data::repos::Repo;
 
 pub struct ConfirmationsService {
-    ctx: DbContext,
+    conn: PostgresConnection,
 }
 
 impl ConfirmationsService {
-    pub fn new(ctx: DbContext) -> ConfirmationsService {
-        ConfirmationsService { ctx }
+    pub fn new(conn: PostgresConnection) -> ConfirmationsService {
+        ConfirmationsService { conn }
     }
 
-    pub fn get_by_token(&self, token: &str) -> Result<Option<Confirmation>> {
-        Ok(self.ctx.confirmations().get_by_token(token)?)
+    pub fn get_by_token(&self, t: &str) -> Result<Option<Confirmation>> {
+        use data::schema::confirmations::dsl::*;
+
+        // TODO:
+        // Properly handle errors
+
+        Ok(confirmations
+            .filter(token.eq(t))
+            .first::<Confirmation>(&self.conn.get()?)
+            .optional()
+            .unwrap())
     }
 
-    pub fn get_by_otp(&self, otp: &str) -> Result<Option<Confirmation>> {
-        Ok(self.ctx.confirmations().get_by_otp(otp)?)
+    pub fn get_by_otp(&self, o: &str) -> Result<Option<Confirmation>> {
+        use data::schema::confirmations::dsl::*;
+
+        // TODO:
+        // Properly handle errors
+
+        Ok(confirmations
+            .filter(otp.eq(o))
+            .first::<Confirmation>(&self.conn.get()?)
+            .optional()
+            .unwrap())
     }
 
     pub fn create(&self, new_conf: &NewConfirmation) -> Result<Confirmation> {
-        Ok(self.ctx.confirmations().add(new_conf)?)
+        use data::schema::confirmations::dsl::*;
+
+        // TODO:
+        // Properly handle errors
+
+        Ok(data::diesel::insert_into(confirmations)
+            .values(new_conf)
+            .get_result(&self.conn.get()?)
+            .unwrap())
     }
 
     pub fn delete(&self, conf: Confirmation) -> Result<usize> {
-        Ok(self.ctx.confirmations().remove(conf)?)
+        // TODO:
+        // Properly handle errors
+
+        Ok(data::diesel::delete(conf)
+            .execute(&self.conn.get()?)
+            .unwrap())
     }
 }
