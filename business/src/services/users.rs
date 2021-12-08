@@ -17,46 +17,37 @@ impl UsersService {
     pub fn get_by_username(&self, uname: &str) -> Result<User> {
         use data::schema::users::dsl::*;
 
-        // TODO:
-        // Properly handle errors
-
-        Ok(users
-            .filter(username.eq(uname))
-            .first(&self.conn.get()?)
-            .unwrap())
+        Ok(data::result::adapt(
+            users.filter(username.eq(uname)).first(&self.conn.get()?),
+        )?)
     }
 
     pub fn get_by_email(&self, em: &str) -> Result<User> {
         use data::schema::users::dsl::*;
 
-        // TODO:
-        // Properly handle errors
-
-        Ok(users.filter(email.eq(em)).first(&self.conn.get()?).unwrap())
+        Ok(data::result::adapt(
+            users.filter(email.eq(em)).first(&self.conn.get()?),
+        )?)
     }
 
     pub fn duplicate_username(&self, uname: &str) -> Result<bool> {
         use data::diesel::dsl::*;
         use data::schema::users::dsl::*;
 
-        // TODO:
-        // Properly handle errors
-
-        Ok(select(exists(users.filter(username.eq(uname))))
-            .get_result(&self.conn.get()?)
-            .unwrap())
+        Ok(data::result::adapt(
+            select(exists(users.filter(username.eq(uname))))
+                .get_result(&self.conn.get()?),
+        )?)
     }
 
     pub fn duplicate_email(&self, em: &str) -> Result<bool> {
         use data::diesel::dsl::*;
         use data::schema::users::dsl::*;
 
-        // TODO:
-        // Properly handle errors
-
-        Ok(select(exists(users.filter(email.eq(em))))
-            .get_result(&self.conn.get()?)
-            .unwrap())
+        Ok(data::result::adapt(
+            select(exists(users.filter(email.eq(em))))
+                .get_result(&self.conn.get()?),
+        )?)
     }
 
     pub fn get_groups(&self, user: &User) -> Result<Vec<Group>> {
@@ -64,15 +55,13 @@ impl UsersService {
         use data::schema::groups;
         use data::schema::user_groups::dsl::*;
 
-        // TODO:
-        // Properly handle errors
-
         let group_ids = UserGroup::belonging_to(user).select(group_id);
 
-        Ok(groups::table
-            .filter(groups::id.eq(any(group_ids)))
-            .load(&self.conn.get()?)
-            .unwrap())
+        Ok(data::result::adapt(
+            groups::table
+                .filter(groups::id.eq(any(group_ids)))
+                .load(&self.conn.get()?),
+        )?)
     }
 
     pub fn create(&self, new_user: &NewUser) -> Result<User> {
@@ -86,33 +75,26 @@ impl UsersService {
             return Err(UserError::EmailAlreadyInUse);
         }
 
-        // TODO:
-        // Properly handle errors
-
-        Ok(data::diesel::insert_into(users)
-            .values(new_user)
-            .get_result(&self.conn.get()?)
-            .unwrap())
+        Ok(data::result::adapt(
+            data::diesel::insert_into(users)
+                .values(new_user)
+                .get_result(&self.conn.get()?),
+        )?)
     }
 
-    pub fn activate(&self, mut user: User) -> Result<User> {
+    pub fn activate(&self, user: User) -> Result<User> {
         use data::schema::users::dsl::*;
 
-        // TODO:
-        // Properly handle errors
-
-        Ok(data::diesel::update(users)
-            .set(is_active.eq(true))
-            .get_result(&self.conn.get()?)
-            .unwrap())
+        Ok(data::result::adapt(
+            data::diesel::update(&user)
+                .set(is_active.eq(true))
+                .get_result(&self.conn.get()?),
+        )?)
     }
 
     pub fn delete(&self, user: User) -> Result<usize> {
-        // TODO:
-        // Properly handle errors
-
-        Ok(data::diesel::delete(&user)
-            .execute(&self.conn.get()?)
-            .unwrap())
+        Ok(data::result::adapt(
+            data::diesel::delete(&user).execute(&self.conn.get()?),
+        )?)
     }
 }

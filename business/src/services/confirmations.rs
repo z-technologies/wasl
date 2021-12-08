@@ -17,46 +17,43 @@ impl ConfirmationsService {
         use data::schema::confirmations::dsl::*;
 
         // TODO:
-        // Properly handle errors
+        // Rethink option
 
-        Ok(confirmations
-            .filter(token.eq(t))
-            .first::<Confirmation>(&self.conn.get()?)
-            .optional()
-            .unwrap())
+        Ok(data::result::adapt(
+            confirmations
+                .filter(token.eq(t))
+                .first::<Confirmation>(&self.conn.get()?)
+                .optional(),
+        )?)
     }
 
     pub fn get_by_otp(&self, o: &str) -> Result<Option<Confirmation>> {
         use data::schema::confirmations::dsl::*;
 
         // TODO:
-        // Properly handle errors
+        // Rethink option
 
-        Ok(confirmations
-            .filter(otp.eq(o))
-            .first::<Confirmation>(&self.conn.get()?)
-            .optional()
-            .unwrap())
+        Ok(data::result::adapt(
+            confirmations
+                .filter(otp.eq(o))
+                .first::<Confirmation>(&self.conn.get()?)
+                .optional(),
+        )?)
     }
 
     pub fn create(&self, new_conf: &NewConfirmation) -> Result<Confirmation> {
         use data::schema::confirmations::dsl::*;
 
-        // TODO:
-        // Properly handle errors
-
-        Ok(data::diesel::insert_into(confirmations)
-            .values(new_conf)
-            .get_result(&self.conn.get()?)
-            .unwrap())
+        Ok(data::result::adapt(
+            data::diesel::insert_into(confirmations)
+                .values(new_conf)
+                .get_result(&self.conn.get()?),
+        )?)
     }
 
     pub fn delete(&self, conf: Confirmation) -> Result<usize> {
-        // TODO:
-        // Properly handle errors
-
-        Ok(data::diesel::delete(&conf)
-            .execute(&self.conn.get()?)
-            .unwrap())
+        Ok(data::result::adapt(
+            data::diesel::delete(&conf).execute(&self.conn.get()?),
+        )?)
     }
 }
