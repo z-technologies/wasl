@@ -113,7 +113,7 @@ impl AuthSerivce {
     where
         F: Fn(&Confirmation) -> bool,
     {
-        let mut user = self.users_svc.get_by_username(username)?;
+        let user = self.users_svc.get_by_username(username)?;
 
         if let Some(conf) = conf {
             if user.is_active {
@@ -121,7 +121,7 @@ impl AuthSerivce {
             }
 
             if conf.user_id == user.id && is_valid_func(&conf) {
-                self.users_svc.activate(user);
+                self.users_svc.activate(user)?;
                 self.confirmations_svc.delete(conf)?;
 
                 return Ok(());
