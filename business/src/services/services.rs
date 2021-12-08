@@ -1,4 +1,5 @@
 use crate::result::Result;
+use data::models::NewService;
 
 use data::connection::*;
 use data::diesel::prelude::*;
@@ -13,12 +14,24 @@ impl ServicesService {
         ServicesService { conn }
     }
 
-    pub fn get_service_by_id(&self, id: KeyType) -> Result<Service> {
+    pub fn get_service_by_id(&self, key: KeyType) -> Result<Service> {
         use data::schema::services::dsl::*;
 
         // TODO:
-        // Properly handle errors
+        // Properly handle NotFound error
 
-        Ok(services.find(id).get_result(&self.conn.get()?).unwrap())
+        Ok(data::result::adapt(
+            services.find(key).get_result(&self.conn.get()?),
+        )?)
+    }
+
+    pub fn create(&self, new_service: &NewService) -> Result<Service> {
+        use data::schema::services::dsl::*;
+
+        Ok(data::result::adapt(
+            data::diesel::insert_into(services)
+                .values(new_service)
+                .get_result(&self.conn.get()?),
+        )?)
     }
 }
