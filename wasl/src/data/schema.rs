@@ -50,6 +50,19 @@ table! {
 }
 
 table! {
+    transactions (id) {
+        id -> Int4,
+        amount -> Numeric,
+        state -> Nullable<Bool>,
+        signature -> Varchar,
+        sender -> Int4,
+        receiver -> Int4,
+        made_at -> Timestamptz,
+        verified_by -> Int4,
+    }
+}
+
+table! {
     user_groups (id) {
         id -> Int4,
         user_id -> Int4,
@@ -84,6 +97,7 @@ allow_tables_to_appear_in_same_query!(
     groups,
     products,
     services,
+    transactions,
     user_groups,
     users,
 );
