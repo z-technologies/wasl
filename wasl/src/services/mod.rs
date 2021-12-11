@@ -1,6 +1,7 @@
 pub mod auth;
 pub mod confirmations;
 pub mod email;
+pub mod repository;
 pub mod services;
 pub mod users;
 
