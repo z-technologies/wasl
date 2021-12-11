@@ -10,6 +10,18 @@ table! {
 }
 
 table! {
+    financial_records (id) {
+        id -> Int4,
+        amount -> Numeric,
+        state -> Nullable<Bool>,
+        signature -> Varchar,
+        made_by -> Int4,
+        made_at -> Timestamptz,
+        verified_by -> Int4,
+    }
+}
+
+table! {
     groups (id) {
         id -> Int4,
         name -> Varchar,
@@ -68,6 +80,7 @@ joinable!(user_groups -> users (user_id));
 
 allow_tables_to_appear_in_same_query!(
     confirmations,
+    financial_records,
     groups,
     products,
     services,
