@@ -2,7 +2,7 @@ use crate::data::models::{Confirmation, Group, NewUser, User};
 use crate::result::{Result, UserError};
 use crate::security::password::is_match;
 use crate::services::email::{make_mail_box, EmailService};
-use crate::services::{ConfirmationsService, UsersService};
+use crate::services::{repository::Repo, ConfirmationsService, UsersService};
 
 use std::sync::Arc;
 
@@ -44,6 +44,14 @@ impl AuthSerivce {
 
     pub fn signup(&self, new_user: &NewUser) -> Result<User> {
         let user = self.users_svc.create(new_user)?;
+
+        if self.users_svc.username_exists(&new_user.username)? {
+            return Err(UserError::UsernameAlreadyInUse);
+        }
+
+        if self.users_svc.email_exists(&new_user.email)? {
+            return Err(UserError::EmailAlreadyInUse);
+        }
 
         match self.send_verification_email(&user) {
             Ok(..) => Ok(user),

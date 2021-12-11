@@ -2,6 +2,7 @@ use crate::data::connection::*;
 use crate::data::models::{Group, NewUser, User, UserGroup};
 use crate::result::Result;
 use crate::result::UserError;
+use crate::services::repository::Repo;
 
 use diesel::prelude::*;
 
@@ -54,22 +55,6 @@ impl UsersService {
             .load(&self.conn.get()?)?)
     }
 
-    pub fn create(&self, new_user: &NewUser) -> Result<User> {
-        use crate::data::schema::users::dsl::*;
-
-        if self.username_exists(&new_user.username)? {
-            return Err(UserError::UsernameAlreadyInUse);
-        }
-
-        if self.email_exists(&new_user.email)? {
-            return Err(UserError::EmailAlreadyInUse);
-        }
-
-        Ok(diesel::insert_into(users)
-            .values(new_user)
-            .get_result(&self.conn.get()?)?)
-    }
-
     pub fn activate(&self, user: User) -> Result<User> {
         use crate::data::schema::users::dsl::*;
 
@@ -80,5 +65,13 @@ impl UsersService {
 
     pub fn delete(&self, user: User) -> Result<usize> {
         Ok(diesel::delete(&user).execute(&self.conn.get()?)?)
+    }
+}
+
+impl Repo<crate::data::schema::users::dsl::users> for UsersService {
+    fn get_connection(
+        &self,
+    ) -> Result<<PostgresConnection as DatabaseConnection>::Conn> {
+        Ok(self.conn.get()?)
     }
 }
