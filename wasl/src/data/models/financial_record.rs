@@ -22,6 +22,6 @@ pub struct FinancialRecord {
 #[DieselType = "Financial_record_state"]
 pub enum FinancialRecordState {
     Pending,
-    Verified,
     Rejected,
+    Verified,
 }
