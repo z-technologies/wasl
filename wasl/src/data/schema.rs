@@ -71,7 +71,7 @@ table! {
     transactions (id) {
         id -> Int4,
         amount -> Numeric,
-        state -> Nullable<Bool>,
+        state -> Transaction_state,
         signature -> Varchar,
         sender -> Int4,
         receiver -> Int4,
