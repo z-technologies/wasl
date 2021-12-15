@@ -3,3 +3,7 @@
 
 [print_schema]
 file = "src/data/schema.rs"
+import_types = [
+    "diesel::sql_types::*",
+    "crate::data::models::*"
+]
