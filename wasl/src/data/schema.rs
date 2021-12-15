@@ -1,4 +1,7 @@
 table! {
+    use diesel::sql_types::*;
+    use crate::data::models::*;
+
     confirmations (id) {
         id -> Int4,
         user_id -> Int4,
@@ -10,10 +13,13 @@ table! {
 }
 
 table! {
+    use diesel::sql_types::*;
+    use crate::data::models::*;
+
     financial_records (id) {
         id -> Int4,
         amount -> Numeric,
-        state -> Nullable<Bool>,
+        state -> Financial_record_state,
         signature -> Varchar,
         made_by -> Int4,
         made_at -> Timestamptz,
@@ -22,6 +28,9 @@ table! {
 }
 
 table! {
+    use diesel::sql_types::*;
+    use crate::data::models::*;
+
     groups (id) {
         id -> Int4,
         name -> Varchar,
@@ -29,6 +38,9 @@ table! {
 }
 
 table! {
+    use diesel::sql_types::*;
+    use crate::data::models::*;
+
     products (id) {
         id -> Int4,
         title -> Varchar,
@@ -39,6 +51,9 @@ table! {
 }
 
 table! {
+    use diesel::sql_types::*;
+    use crate::data::models::*;
+
     services (id) {
         id -> Int4,
         title -> Varchar,
@@ -50,6 +65,9 @@ table! {
 }
 
 table! {
+    use diesel::sql_types::*;
+    use crate::data::models::*;
+
     transactions (id) {
         id -> Int4,
         amount -> Numeric,
@@ -58,11 +76,13 @@ table! {
         sender -> Int4,
         receiver -> Int4,
         made_at -> Timestamptz,
-        verified_by -> Int4,
     }
 }
 
 table! {
+    use diesel::sql_types::*;
+    use crate::data::models::*;
+
     user_groups (id) {
         id -> Int4,
         user_id -> Int4,
@@ -71,6 +91,9 @@ table! {
 }
 
 table! {
+    use diesel::sql_types::*;
+    use crate::data::models::*;
+
     users (id) {
         id -> Int4,
         username -> Varchar,
