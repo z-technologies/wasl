@@ -6,11 +6,12 @@ edition = "2021"
 [dependencies]
 base64      = "0.13.0"
 chrono      = { version = "0.4", features = ["serde"] }
-diesel      = { version = "1.4", features = ["postgres", "r2d2", "chrono"] }
+diesel      = { version = "1.4", features = ["postgres", "r2d2", "chrono", "numeric"] }
 derive_more = "0.99"
 lazy_static = "1.4"
 lettre      = "0.10.0-rc.4"
 native-tls  = "0.2"
+bigdecimal  = "0.3"
 rand        = "0.8"
 rust-argon2 = "0.8.3"
 regex       = "1"
