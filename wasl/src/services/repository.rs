@@ -50,17 +50,6 @@ where
             .load(&self.get_connection()?)?)
     }
 
-    fn create<'a, N>(&self, item: &'a N) -> Result<M>
-    where
-        &'a N: Insertable<M::Table>,
-        InsertStatement<M::Table, <&'a N as Insertable<M::Table>>::Values>:
-            LoadQuery<DbConnection, M>,
-    {
-        Ok(diesel::insert_into(M::table())
-            .values(item)
-            .get_result(&self.get_connection()?)?)
-    }
-
     fn update(&self, item: M) -> Result<M>
     where
         M: IntoUpdateTarget + AsChangeset<Target = M::Table>,
