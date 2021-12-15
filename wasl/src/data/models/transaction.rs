@@ -8,11 +8,20 @@ pub struct Transaction {
     pub id: KeyType,
 
     pub amount: BigDecimal,
-    pub state: Option<bool>,
+
+    pub state: TransactionState,
     pub signature: String,
 
     pub sender: KeyType,
     pub receiver: KeyType,
 
     pub made_at: chrono::DateTime<chrono::Utc>,
+}
+
+#[derive(Clone, Debug, DbEnum)]
+#[DieselType = "Transaction_state"]
+pub enum TransactionState {
+    Pending,
+    Declined,
+    Confirmed,
 }
