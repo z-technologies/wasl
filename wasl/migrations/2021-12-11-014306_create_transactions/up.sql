@@ -1,12 +1,10 @@
 CREATE TABLE transactions (
-        id          SERIAL    PRIMARY KEY,
-        amount      NUMERIC   NOT NULL,
-        state       BOOLEAN   NULL,
-        signature   VARCHAR   NOT NULL,
+    id          SERIAL    PRIMARY KEY,
+    amount      NUMERIC   NOT NULL,
+    state       BOOLEAN   NULL,
+    signature   VARCHAR   NOT NULL,
 
-        sender      SERIAL    NOT NULL REFERENCES users(id),
-        receiver    SERIAL    NOT NULL REFERENCES users(id),
-        made_at     TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-        verified_by SERIAL    REFERENCES users(id)
+    sender      SERIAL    NOT NULL REFERENCES users(id),
+    receiver    SERIAL    NOT NULL REFERENCES users(id),
+    made_at     TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
 )
