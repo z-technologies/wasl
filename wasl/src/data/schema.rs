@@ -81,6 +81,7 @@ table! {
         id -> Int4,
         title -> Varchar,
         description -> Varchar,
+        price -> Numeric,
         available_begin -> Nullable<Time>,
         available_end -> Nullable<Time>,
         user_id -> Int4,
