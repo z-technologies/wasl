@@ -2,7 +2,7 @@ use crate::data::models::{Confirmation, Group, NewUser, User};
 use crate::result::{Result, UserError};
 use crate::security::password::is_match;
 use crate::services::email::{make_mail_box, EmailService};
-use crate::services::{repository::Repo, ConfirmationsService, UsersService};
+use crate::services::{ConfirmationsService, UsersService};
 
 use std::sync::Arc;
 
