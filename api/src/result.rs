@@ -56,13 +56,15 @@ impl ResponseError for ApiError {
                     StatusCode::INTERNAL_SERVER_ERROR
                 }
                 UserError::NotFound => StatusCode::NOT_FOUND,
-                UserError::InvalidConfirmationDetails => StatusCode::FORBIDDEN,
+                UserError::InvalidConfirmationDetails
+                | UserError::InsufficientBalance => StatusCode::FORBIDDEN,
                 UserError::PermissionDenied
                 | UserError::InvalidUsernameOrPassword => {
                     StatusCode::UNAUTHORIZED
                 }
                 UserError::UsernameAlreadyInUse
-                | UserError::EmailAlreadyInUse => StatusCode::CONFLICT,
+                | UserError::EmailAlreadyInUse
+                | UserError::TimePeriodsOverlap => StatusCode::CONFLICT,
             },
         }
     }
