@@ -7,6 +7,7 @@ use wasl::services::ServicesService;
 use wasl::services::UsersService;
 
 use actix_web::{delete, get, post, web, HttpResponse};
+use bigdecimal::BigDecimal;
 use serde::Deserialize;
 
 use std::sync::Arc;
@@ -47,8 +48,8 @@ pub async fn add(
 pub async fn delete(
     auth: Identity,
     id: web::Path<KeyType>,
-    services_svc: web::Data<ServicesService>,
     users_svc: web::Data<Arc<UsersService>>,
+    services_svc: web::Data<ServicesService>,
 ) -> Result<HttpResponse> {
     auth.has(AuthGroup::Provider)?;
 
@@ -63,22 +64,52 @@ pub async fn delete(
     Ok(HttpResponse::Ok().finish())
 }
 
+#[post("/{id}/reserve")]
+pub async fn reserve(
+    auth: Identity,
+    id: web::Path<KeyType>,
+    users_svc: web::Data<Arc<UsersService>>,
+    services_svc: web::Data<Arc<ServicesService>>,
+    period: web::Json<DateTimePeriod>,
+) -> Result<HttpResponse> {
+    auth.has(AuthGroup::Customer)?;
+
+    let user = auth.user(users_svc.get_ref().clone()).await?;
+
+    let reservation = web::block(move || {
+        let service = services_svc.get_ref().get_service_by_id(id.0)?;
+        services_svc.make_reservation(&service, &user, period.begin, period.end)
+    })
+    .await?
+    .0;
+
+    Ok(HttpResponse::Ok().json(reservation))
+}
+
 #[derive(Deserialize)]
 pub struct AddSerivceFrom {
     pub title: String,
     pub description: String,
+    pub price: BigDecimal,
     pub available_begin: Option<chrono::NaiveTime>,
     pub available_end: Option<chrono::NaiveTime>,
 }
 
+#[derive(Deserialize)]
+pub struct DateTimePeriod {
+    pub begin: chrono::NaiveDateTime,
+    pub end: chrono::NaiveDateTime,
+}
+
 impl AddSerivceFrom {
-    fn new_service_for(self, user: &User) -> NewService {
+    fn new_service_for(self, provider: &User) -> NewService {
         NewService {
             title: self.title,
             description: self.description,
+            price: self.price,
             available_begin: self.available_begin,
             available_end: self.available_end,
-            user_id: user.id,
+            user_id: provider.id,
         }
     }
 }
