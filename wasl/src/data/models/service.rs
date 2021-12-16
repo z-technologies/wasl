@@ -66,3 +66,19 @@ pub struct NewServiceReservation {
     pub reservation_begin: chrono::NaiveDateTime,
     pub reservation_end: chrono::NaiveDateTime,
 }
+
+impl NewServiceReservation {
+    pub fn new(
+        by: &User,
+        service: &Service,
+        begin: chrono::NaiveDateTime,
+        end: chrono::NaiveDateTime,
+    ) -> NewServiceReservation {
+        NewServiceReservation {
+            made_by: by.id,
+            service_id: service.id,
+            reservation_begin: begin,
+            reservation_end: end,
+        }
+    }
+}
