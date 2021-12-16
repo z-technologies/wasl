@@ -60,7 +60,7 @@ impl Identity {
         }
     }
 
-    pub async fn user<'a>(self, users_svc: Arc<UsersService>) -> Result<User> {
+    pub async fn user(self, users_svc: Arc<UsersService>) -> Result<User> {
         Ok(
             web::block(move || users_svc.get_by_username(&self.0.username))
                 .await
