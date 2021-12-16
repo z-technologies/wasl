@@ -77,4 +77,16 @@ impl TransactionsService {
             .iter()
             .sum::<BigDecimal>())
     }
+
+    pub fn total_sender_non_declined(&self, user: &User) -> Result<BigDecimal> {
+        use crate::data::schema::transactions::dsl::*;
+
+        Ok(transactions
+            .select(amount)
+            .filter(receiver.eq(user.id))
+            .filter(state.ne(TransactionState::Declined))
+            .load(&self.conn.get()?)?
+            .iter()
+            .sum::<BigDecimal>())
+    }
 }
