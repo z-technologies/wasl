@@ -10,7 +10,7 @@ pub struct Transaction {
     pub state: TransactionState,
     pub sender: KeyType,
     pub receiver: KeyType,
-    pub made_at: chrono::NaiveTime,
+    pub made_at: chrono::NaiveDateTime,
 }
 
 #[derive(Debug, Insertable)]
