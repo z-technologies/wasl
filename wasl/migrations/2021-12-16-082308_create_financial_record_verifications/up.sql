@@ -3,7 +3,7 @@ CREATE TYPE financial_record_verification_outcome AS ENUM(
     'verified'
 );
 
-CREATE TABLE financial_record_verification (
+CREATE TABLE financial_record_verifications (
     id SERIAL                                         PRIMARY KEY,
     outcome     financial_record_verification_outcome NOT NULL,
     verified_by SERIAL                   NOT NULL REFERENCES users(id),

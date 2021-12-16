@@ -1,2 +1,2 @@
-DROP TABLE financial_record_verification;
+DROP TABLE financial_record_verifications;
 DROP TYPE financial_record_verification_outcome;
