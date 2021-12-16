@@ -34,7 +34,7 @@ impl FinancialRecordsService {
             .load(&self.conn.get()?)?)
     }
 
-    pub fn total_for(&self, user: &User) -> Result<BigDecimal> {
+    pub fn total_verified(&self, user: &User) -> Result<BigDecimal> {
         use crate::data::schema::financial_record_verifications::dsl::*;
         use crate::data::schema::financial_records::dsl::*;
 
