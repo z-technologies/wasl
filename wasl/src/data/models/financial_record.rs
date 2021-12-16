@@ -8,12 +8,8 @@ use validator::Validate;
 #[belongs_to(User, foreign_key = "made_by")]
 pub struct FinancialRecord {
     pub id: KeyType,
-
     pub amount: BigDecimal,
-
     pub state: FinancialRecordState,
-    pub signature: String,
-
     pub made_by: KeyType,
     pub made_at: chrono::DateTime<chrono::Utc>,
 }
