@@ -64,6 +64,19 @@ table! {
     use diesel::sql_types::*;
     use crate::data::models::*;
 
+    service_reservations (id) {
+        id -> Int4,
+        made_by -> Int4,
+        service_id -> Int4,
+        reservation_begin -> Timestamptz,
+        reservation_end -> Timestamptz,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use crate::data::models::*;
+
     services (id) {
         id -> Int4,
         title -> Varchar,
@@ -132,6 +145,7 @@ allow_tables_to_appear_in_same_query!(
     financial_records,
     groups,
     products,
+    service_reservations,
     services,
     transactions,
     user_groups,
