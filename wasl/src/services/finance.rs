@@ -1,5 +1,6 @@
-use crate::data::models::User;
-use crate::result::Result;
+use crate::data::connection::*;
+use crate::data::models::{NewTransaction, Transaction, User};
+use crate::result::{Result, UserError};
 use crate::services::{FinancialRecordsService, TransactionsService};
 
 use bigdecimal::BigDecimal;
@@ -7,16 +8,19 @@ use bigdecimal::BigDecimal;
 use std::sync::Arc;
 
 pub struct FinanceService {
+    conn: PostgresConnection,
     financial_records_svc: Arc<FinancialRecordsService>,
     transactions_svc: Arc<TransactionsService>,
 }
 
 impl FinanceService {
     pub fn new(
+        conn: PostgresConnection,
         financial_records_svc: Arc<FinancialRecordsService>,
         transactions_svc: Arc<TransactionsService>,
     ) -> FinanceService {
         FinanceService {
+            conn,
             financial_records_svc,
             transactions_svc,
         }
@@ -56,5 +60,27 @@ impl FinanceService {
 
         Ok(from_financial_recrods + from_transactions_in
             - from_transactions_out)
+    }
+
+    pub fn transfer_pending(
+        &self,
+        from: &User,
+        to: &User,
+        amount: BigDecimal,
+    ) -> Result<Transaction> {
+        Ok(self
+            .conn
+            .get()?
+            .build_transaction()
+            .run::<Transaction, UserError, _>(|| {
+                if amount < self.usable_balance(from)? {
+                    return Err(UserError::InsufficientBalance);
+                }
+
+                let new_transaction =
+                    NewTransaction::new_pending(from, to, amount);
+
+                Ok(self.transactions_svc.as_ref().create(&new_transaction)?)
+            })?)
     }
 }
