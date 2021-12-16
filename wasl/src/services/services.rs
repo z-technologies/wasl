@@ -1,19 +1,32 @@
 use crate::data::connection::*;
 use crate::data::models::{
     KeyType, NewService, NewServiceReservation, Service, ServiceReservation,
-    User,
+    Transaction, User,
 };
 use crate::result::{Result, UserError};
+use crate::services::{FinanceService, UsersService};
 
 use diesel::prelude::*;
 
+use std::sync::Arc;
+
 pub struct ServicesService {
     conn: PostgresConnection,
+    users_svc: Arc<UsersService>,
+    finance_svc: Arc<FinanceService>,
 }
 
 impl ServicesService {
-    pub fn new(conn: PostgresConnection) -> ServicesService {
-        ServicesService { conn }
+    pub fn new(
+        conn: PostgresConnection,
+        users_svc: Arc<UsersService>,
+        finance_svc: Arc<FinanceService>,
+    ) -> ServicesService {
+        ServicesService {
+            conn,
+            users_svc,
+            finance_svc,
+        }
     }
 
     pub fn get_service_by_id(&self, key: KeyType) -> Result<Service> {
@@ -48,39 +61,55 @@ impl ServicesService {
         )
     }
 
-    pub fn can_make_reservation(
+    pub fn is_available(
         &self,
         service: &Service,
-        reservation: &NewServiceReservation,
+        begin: &chrono::NaiveDateTime,
+        end: &chrono::NaiveDateTime,
     ) -> Result<bool> {
         let reservations = self.reservations(service)?;
 
         Ok(reservations.iter().all(|r| {
             !periods_overlap(
                 (&r.reservation_begin, &r.reservation_end),
-                (&reservation.reservation_begin, &reservation.reservation_end),
+                (begin, end),
             )
         }))
     }
 
     pub fn make_reservation(
         &self,
-        reservation: &NewServiceReservation,
-    ) -> Result<ServiceReservation> {
+        service: &Service,
+        customer: &User,
+        begin: chrono::NaiveDateTime,
+        end: chrono::NaiveDateTime,
+    ) -> Result<(ServiceReservation, Transaction)> {
         use crate::data::schema::service_reservations::dsl::*;
-        use crate::data::schema::services::dsl::*;
 
-        let service = services
-            .find(reservation.service_id)
-            .get_result(&self.conn.get()?)?;
+        Ok(self
+            .conn
+            .get()?
+            .build_transaction()
+            .run::<_, UserError, _>(|| {
+                if !self.is_available(&service, &begin, &end)? {
+                    return Err(UserError::TimePeriodsOverlap);
+                }
 
-        if !self.can_make_reservation(&service, reservation)? {
-            return Err(UserError::TimePeriodsOverlap);
-        }
+                let new_reservation =
+                    NewServiceReservation::new(customer, service, begin, end);
+                let transaction = self.finance_svc.transfer_pending(
+                    customer,
+                    &self.users_svc.get_by_id(service.id)?,
+                    service.price.clone(),
+                )?;
 
-        Ok(diesel::insert_into(service_reservations)
-            .values(reservation)
-            .get_result(&self.conn.get()?)?)
+                Ok((
+                    diesel::insert_into(service_reservations)
+                        .values(&new_reservation)
+                        .get_result(&self.conn.get()?)?,
+                    transaction,
+                ))
+            })?)
     }
 }
 
