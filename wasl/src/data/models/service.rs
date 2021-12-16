@@ -1,6 +1,7 @@
 use crate::data::models::{KeyType, User};
 use crate::data::schema::{service_reservations, services};
 
+use bigdecimal::BigDecimal;
 use serde::{Deserialize, Serialize};
 
 #[derive(
@@ -19,6 +20,7 @@ pub struct Service {
     pub id: KeyType,
     pub title: String,
     pub description: String,
+    pub price: BigDecimal,
     pub available_begin: Option<chrono::NaiveTime>,
     pub available_end: Option<chrono::NaiveTime>,
     pub user_id: KeyType,
@@ -29,6 +31,7 @@ pub struct Service {
 pub struct NewService {
     pub title: String,
     pub description: String,
+    pub price: BigDecimal,
     pub available_begin: Option<chrono::NaiveTime>,
     pub available_end: Option<chrono::NaiveTime>,
     pub user_id: KeyType,
