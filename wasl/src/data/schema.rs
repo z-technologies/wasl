@@ -16,9 +16,10 @@ table! {
     use diesel::sql_types::*;
     use crate::data::models::*;
 
-    financial_record_verification (id) {
+    financial_record_verifications (id) {
         id -> Int4,
         outcome -> Financial_record_verification_outcome,
+        financial_record_id -> Int4,
         verified_by -> Int4,
         verified_at -> Timestamptz,
     }
@@ -117,7 +118,8 @@ table! {
 }
 
 joinable!(confirmations -> users (user_id));
-joinable!(financial_record_verification -> users (verified_by));
+joinable!(financial_record_verifications -> financial_records (financial_record_id));
+joinable!(financial_record_verifications -> users (verified_by));
 joinable!(financial_records -> users (made_by));
 joinable!(products -> users (user_id));
 joinable!(services -> users (user_id));
@@ -126,7 +128,7 @@ joinable!(user_groups -> users (user_id));
 
 allow_tables_to_appear_in_same_query!(
     confirmations,
-    financial_record_verification,
+    financial_record_verifications,
     financial_records,
     groups,
     products,
