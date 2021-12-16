@@ -10,7 +10,7 @@ pub struct Transaction {
     pub state: TransactionState,
     pub sender: KeyType,
     pub receiver: KeyType,
-    pub made_at: chrono::DateTime<chrono::Utc>,
+    pub made_at: chrono::NaiveTime,
 }
 
 #[derive(Clone, Debug, DbEnum)]
