@@ -7,6 +7,7 @@ edition = "2021"
 wasl = { path = "../wasl" }
 
 actix-web    = "3"
+bigdecimal   = { version = "0.1", features = ["serde"] }
 chrono       = "0.4"
 config       = "0.11"
 derive_more  = "0.99"

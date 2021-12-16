@@ -80,6 +80,12 @@ pub enum UserError {
 
     #[display(fmt = "invalid confirmation details")]
     InvalidConfirmationDetails,
+
+    #[display(fmt = "time periods overlap")]
+    TimePeriodsOverlap,
+
+    #[display(fmt = "insufficient balance")]
+    InsufficientBalance,
 }
 
 impl std::error::Error for InternalError {}

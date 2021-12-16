@@ -3,7 +3,6 @@ pub mod confirmations;
 pub mod email;
 pub mod finance;
 pub mod financial_records;
-pub mod repository;
 pub mod services;
 pub mod transactions;
 pub mod users;

@@ -1,5 +1,7 @@
 use crate::data::connection::*;
-use crate::data::models::{Transaction, TransactionState, User};
+use crate::data::models::{
+    NewTransaction, Transaction, TransactionState, User,
+};
 use crate::result::Result;
 
 use bigdecimal::BigDecimal;
@@ -88,5 +90,16 @@ impl TransactionsService {
             .load(&self.conn.get()?)?
             .iter()
             .sum::<BigDecimal>())
+    }
+
+    pub fn create(
+        &self,
+        new_transaction: &NewTransaction,
+    ) -> Result<Transaction> {
+        use crate::data::schema::transactions::dsl::*;
+
+        Ok(diesel::insert_into(transactions)
+            .values(new_transaction)
+            .get_result(&self.conn.get()?)?)
     }
 }

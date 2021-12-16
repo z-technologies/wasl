@@ -32,9 +32,14 @@ pub fn setup_data(cfg: &mut web::ServiceConfig, settings: Arc<Settings>) {
     let conn = PostgresConnection::new(&settings.database.url())
         .expect("could not create a database connection");
 
-    // create services
-    let email_svc = Arc::new(EmailService::new(&settings.email).unwrap());
+    // top-level services
     let users_svc = Arc::new(UsersService::new(conn.clone()));
+    let email_svc = Arc::new(EmailService::new(&settings.email).unwrap());
+    let financial_records_svc =
+        Arc::new(FinancialRecordsService::new(conn.clone()));
+    let transactions_svc = Arc::new(TransactionsService::new(conn.clone()));
+
+    // authentication-related services
     let confirmations_svc =
         Arc::new(ConfirmationsService::new(conn.clone(), users_svc.clone()));
     let auth_svc = Arc::new(AuthSerivce::new(
@@ -42,14 +47,30 @@ pub fn setup_data(cfg: &mut web::ServiceConfig, settings: Arc<Settings>) {
         confirmations_svc.clone(),
         email_svc.clone(),
     ));
-    let services_svc = Arc::new(ServicesService::new(conn.clone()));
+
+    // financial operations service
+    let finance_svc = Arc::new(FinanceService::new(
+        conn.clone(),
+        financial_records_svc.clone(),
+        transactions_svc.clone(),
+    ));
+
+    // services managment service
+    let services_svc = Arc::new(ServicesService::new(
+        conn.clone(),
+        users_svc.clone(),
+        finance_svc.clone(),
+    ));
 
     // export data
     cfg.data(settings.clone())
-        .data(email_svc)
         .data(users_svc)
+        .data(email_svc)
+        .data(financial_records_svc)
+        .data(transactions_svc)
         .data(confirmations_svc)
         .data(auth_svc)
+        .data(finance_svc)
         .data(services_svc);
 }
 
