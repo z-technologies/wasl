@@ -1,7 +1,6 @@
 use crate::data::connection::*;
-use crate::data::models::{Group, NewUser, User, UserGroup};
+use crate::data::models::{Group, KeyType, NewUser, User, UserGroup};
 use crate::result::Result;
-use crate::services::repository::Repo;
 
 use diesel::prelude::*;
 
@@ -12,6 +11,12 @@ pub struct UsersService {
 impl UsersService {
     pub fn new(conn: PostgresConnection) -> UsersService {
         UsersService { conn }
+    }
+
+    pub fn get_by_id(&self, uid: KeyType) -> Result<User> {
+        use crate::data::schema::users::dsl::*;
+
+        Ok(users.find(uid).first(&self.conn.get()?)?)
     }
 
     pub fn get_by_username(&self, uname: &str) -> Result<User> {
@@ -59,7 +64,7 @@ impl UsersService {
 
         Ok(diesel::insert_into(users)
             .values(item)
-            .get_result(&self.get_connection()?)?)
+            .get_result(&self.conn.get()?)?)
     }
 
     pub fn activate(&self, user: User) -> Result<User> {
@@ -72,13 +77,5 @@ impl UsersService {
 
     pub fn delete(&self, user: User) -> Result<usize> {
         Ok(diesel::delete(&user).execute(&self.conn.get()?)?)
-    }
-}
-
-impl Repo<crate::data::schema::users::dsl::users> for UsersService {
-    fn get_connection(
-        &self,
-    ) -> Result<<PostgresConnection as DatabaseConnection>::Conn> {
-        Ok(self.conn.get()?)
     }
 }
