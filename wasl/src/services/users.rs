@@ -1,7 +1,6 @@
 use crate::data::connection::*;
 use crate::data::models::{Group, NewUser, User, UserGroup};
 use crate::result::Result;
-use crate::result::UserError;
 use crate::services::repository::Repo;
 
 use diesel::prelude::*;
@@ -55,20 +54,20 @@ impl UsersService {
             .load(&self.conn.get()?)?)
     }
 
+    pub fn create(&self, item: &NewUser) -> Result<User> {
+        use crate::data::schema::users::dsl::*;
+
+        Ok(diesel::insert_into(users)
+            .values(item)
+            .get_result(&self.get_connection()?)?)
+    }
+
     pub fn activate(&self, user: User) -> Result<User> {
         use crate::data::schema::users::dsl::*;
 
         Ok(diesel::update(&user)
             .set(is_active.eq(true))
             .get_result(&self.conn.get()?)?)
-    }
-
-    pub fn create<'a>(&self, item: &'a NewUser) -> Result<User> {
-        use crate::data::schema::users::dsl::*;
-
-        Ok(diesel::insert_into(users)
-            .values(item)
-            .get_result(&self.get_connection()?)?)
     }
 
     pub fn delete(&self, user: User) -> Result<usize> {
