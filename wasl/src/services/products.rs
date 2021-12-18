@@ -1,5 +1,8 @@
 use crate::data::connection::*;
-use crate::data::models::{KeyType, NewProduct, Product, Transaction, User};
+use crate::data::models::{
+    KeyType, NewProduct, NewProductOrder, Product, ProductOrder, Transaction,
+    User,
+};
 use crate::result::{Result, UserError};
 use crate::services::{FinanceService, UsersService};
 
@@ -49,14 +52,24 @@ impl ProductsService {
     }
 
     pub fn is_available(&self, product: &Product) -> Result<bool> {
-        Ok(product.available_quantity > 0)
+        use diesel::dsl::*;
+
+        // TODO: get only accepted orders
+
+        let orders_count: i64 = ProductOrder::belonging_to(product)
+            .select(count_star())
+            .first(&self.conn.get()?)?;
+
+        Ok(product.available_quantity - orders_count > 0)
     }
 
     pub fn purchase(
         &self,
         product: &mut Product,
         customer: &User,
-    ) -> Result<Transaction> {
+    ) -> Result<(ProductOrder, Transaction)> {
+        use crate::data::schema::product_orders::dsl::*;
+
         Ok(self
             .conn
             .get()?
@@ -66,16 +79,19 @@ impl ProductsService {
                     return Err(UserError::OutOfStock);
                 }
 
-                // TODO: Fix this
-                product.available_quantity -= 1;
-
-                let transactions = self.finance_svc.transfer_pending(
+                let new_product_order = NewProductOrder::new(customer, product);
+                let transaction = self.finance_svc.transfer_pending(
                     customer,
                     &self.users_svc.get_by_id(product.user_id)?,
                     product.price.clone(),
                 )?;
 
-                Ok(transactions)
+                Ok((
+                    diesel::insert_into(product_orders)
+                        .values(&new_product_order)
+                        .get_result(&self.conn.get()?)?,
+                    transaction,
+                ))
             })?)
     }
 }
