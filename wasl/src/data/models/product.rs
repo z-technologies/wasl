@@ -21,7 +21,7 @@ pub struct Product {
     pub title: String,
     pub description: String,
     pub price: BigDecimal,
-    pub available_quantity: i32,
+    pub available_quantity: i64,
     pub user_id: KeyType,
 }
 
@@ -31,7 +31,7 @@ pub struct NewProduct {
     pub title: String,
     pub description: String,
     pub price: BigDecimal,
-    pub available_quantity: i32,
+    pub available_quantity: i64,
     pub user_id: KeyType,
 }
 
