@@ -60,3 +60,12 @@ pub struct NewProductOrder {
     pub made_by: KeyType,
     pub product_id: KeyType,
 }
+
+impl NewProductOrder {
+    pub fn new(by: &User, product: &Product) -> NewProductOrder {
+        NewProductOrder {
+            made_by: by.id,
+            product_id: product.id,
+        }
+    }
+}
