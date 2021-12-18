@@ -86,6 +86,9 @@ pub enum UserError {
 
     #[display(fmt = "insufficient balance")]
     InsufficientBalance,
+
+    #[display(fmt = "out of stock")]
+    OutOfStock,
 }
 
 impl std::error::Error for InternalError {}
