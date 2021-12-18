@@ -55,6 +55,7 @@ table! {
         id -> Int4,
         title -> Varchar,
         description -> Varchar,
+        price -> Numeric,
         available_quantity -> Int4,
         user_id -> Int4,
     }
