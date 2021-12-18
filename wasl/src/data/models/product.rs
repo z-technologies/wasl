@@ -1,6 +1,7 @@
 use crate::data::models::{KeyType, User};
 use crate::data::schema::products;
 
+use bigdecimal::BigDecimal;
 use serde::{Deserialize, Serialize};
 
 #[derive(
@@ -19,6 +20,7 @@ pub struct Product {
     pub id: KeyType,
     pub title: String,
     pub description: String,
+    pub price: BigDecimal,
     pub available_quantity: i32,
     pub user_id: KeyType,
 }
@@ -28,6 +30,7 @@ pub struct Product {
 pub struct NewProduct {
     pub title: String,
     pub description: String,
+    pub price: BigDecimal,
     pub available_quantity: i32,
     pub user_id: KeyType,
 }
