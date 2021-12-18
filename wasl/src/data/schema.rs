@@ -51,17 +51,6 @@ table! {
     use diesel::sql_types::*;
     use crate::data::models::*;
 
-    product_order (id) {
-        id -> Int4,
-        made_by -> Int4,
-        product_id -> Int4,
-    }
-}
-
-table! {
-    use diesel::sql_types::*;
-    use crate::data::models::*;
-
     product_orders (id) {
         id -> Int4,
         made_by -> Int4,
@@ -78,7 +67,7 @@ table! {
         title -> Varchar,
         description -> Varchar,
         price -> Numeric,
-        available_quantity -> Int4,
+        available_quantity -> Int8,
         user_id -> Int4,
     }
 }
@@ -158,8 +147,6 @@ joinable!(confirmations -> users (user_id));
 joinable!(financial_record_verifications -> financial_records (financial_record_id));
 joinable!(financial_record_verifications -> users (verified_by));
 joinable!(financial_records -> users (made_by));
-joinable!(product_order -> products (product_id));
-joinable!(product_order -> users (made_by));
 joinable!(product_orders -> products (product_id));
 joinable!(product_orders -> users (made_by));
 joinable!(products -> users (user_id));
@@ -174,7 +161,6 @@ allow_tables_to_appear_in_same_query!(
     financial_record_verifications,
     financial_records,
     groups,
-    product_order,
     product_orders,
     products,
     service_reservations,
