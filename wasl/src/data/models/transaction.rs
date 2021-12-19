@@ -7,7 +7,6 @@ use bigdecimal::BigDecimal;
 pub struct Transaction {
     pub id: KeyType,
     pub amount: BigDecimal,
-    pub state: TransactionState,
     pub sender: KeyType,
     pub receiver: KeyType,
     pub made_at: chrono::NaiveDateTime,
@@ -17,17 +16,8 @@ pub struct Transaction {
 #[table_name = "transactions"]
 pub struct NewTransaction {
     pub amount: BigDecimal,
-    pub state: TransactionState,
     pub sender: KeyType,
     pub receiver: KeyType,
-}
-
-#[derive(Clone, Debug, DbEnum)]
-#[DieselType = "Transaction_state"]
-pub enum TransactionState {
-    Pending,
-    Declined,
-    Confirmed,
 }
 
 impl NewTransaction {
@@ -38,7 +28,6 @@ impl NewTransaction {
     ) -> NewTransaction {
         NewTransaction {
             amount,
-            state: TransactionState::Pending,
             sender: from.id,
             receiver: to.id,
         }

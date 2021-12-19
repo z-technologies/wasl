@@ -104,10 +104,21 @@ table! {
     use diesel::sql_types::*;
     use crate::data::models::*;
 
+    transaction_confirmations (id) {
+        id -> Int4,
+        outcome -> Transaction_confirmation_outcome,
+        transaction_id -> Int4,
+        confirmed_at -> Timestamptz,
+    }
+}
+
+table! {
+    use diesel::sql_types::*;
+    use crate::data::models::*;
+
     transactions (id) {
         id -> Int4,
         amount -> Numeric,
-        state -> Transaction_state,
         sender -> Int4,
         receiver -> Int4,
         made_at -> Timestamptz,
@@ -153,6 +164,7 @@ joinable!(products -> users (user_id));
 joinable!(service_reservations -> services (service_id));
 joinable!(service_reservations -> users (made_by));
 joinable!(services -> users (user_id));
+joinable!(transaction_confirmations -> transactions (transaction_id));
 joinable!(user_groups -> groups (group_id));
 joinable!(user_groups -> users (user_id));
 
@@ -165,6 +177,7 @@ allow_tables_to_appear_in_same_query!(
     products,
     service_reservations,
     services,
+    transaction_confirmations,
     transactions,
     user_groups,
     users,
