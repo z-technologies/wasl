@@ -55,7 +55,9 @@ impl ResponseError for ApiError {
                 | UserError::CouldNotUpdateAccount => {
                     StatusCode::INTERNAL_SERVER_ERROR
                 }
-                UserError::NotFound => StatusCode::NOT_FOUND,
+                UserError::NotFound | UserError::OutOfStock => {
+                    StatusCode::NOT_FOUND
+                }
                 UserError::InvalidConfirmationDetails
                 | UserError::InsufficientBalance => StatusCode::FORBIDDEN,
                 UserError::PermissionDenied
