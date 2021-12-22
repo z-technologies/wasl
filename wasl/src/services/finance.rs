@@ -29,40 +29,21 @@ impl FinanceService {
     pub fn virtual_balance(&self, user: &User) -> Result<BigDecimal> {
         let from_financial_recrods =
             self.financial_records_svc.as_ref().total_verified(user)?;
+        let from_transactions = self.transactions_svc.as_ref().total(user)?;
 
-        let from_transactions_in = self
-            .transactions_svc
-            .as_ref()
-            .total_receiver_confirmed(user)?;
-
-        let from_transactions_out = self
-            .transactions_svc
-            .as_ref()
-            .total_sender_confirmed(user)?;
-
-        Ok(from_financial_recrods + from_transactions_in
-            - from_transactions_out)
+        Ok(from_financial_recrods + from_transactions)
     }
 
     pub fn usable_balance(&self, user: &User) -> Result<BigDecimal> {
         let from_financial_recrods =
             self.financial_records_svc.as_ref().total_verified(user)?;
+        let from_transactions =
+            self.transactions_svc.as_ref().total_usable(user)?;
 
-        let from_transactions_in = self
-            .transactions_svc
-            .as_ref()
-            .total_receiver_confirmed(user)?;
-
-        let from_transactions_out = self
-            .transactions_svc
-            .as_ref()
-            .total_sender_confirmed(user)?;
-
-        Ok(from_financial_recrods + from_transactions_in
-            - from_transactions_out)
+        Ok(from_financial_recrods + from_transactions)
     }
 
-    pub fn transfer_pending(
+    pub fn transfer(
         &self,
         from: &User,
         to: &User,
@@ -73,14 +54,14 @@ impl FinanceService {
             .get()?
             .build_transaction()
             .run::<Transaction, UserError, _>(|| {
-                if amount < self.usable_balance(from)? {
+                if amount > self.usable_balance(from)? {
                     return Err(UserError::InsufficientBalance);
                 }
 
-                let new_transaction =
-                    NewTransaction::new_pending(from, to, amount);
-
-                Ok(self.transactions_svc.as_ref().create(&new_transaction)?)
+                Ok(self
+                    .transactions_svc
+                    .as_ref()
+                    .create(&NewTransaction::new(from, to, amount))?)
             })?)
     }
 }
