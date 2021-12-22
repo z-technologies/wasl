@@ -39,9 +39,28 @@ pub struct TransactionConfirmation {
     pub confirmed_at: chrono::DateTime<chrono::Utc>,
 }
 
+#[derive(Debug, Insertable)]
+#[table_name = "transaction_confirmations"]
+pub struct NewTransactionConfirmation {
+    pub outcome: TransactionConfirmationOutcome,
+    pub transaction_id: KeyType,
+}
+
 #[derive(Clone, Debug, DbEnum)]
 #[DieselType = "Transaction_confirmation_outcome"]
 pub enum TransactionConfirmationOutcome {
     Declined,
     Confirmed,
+}
+
+impl NewTransactionConfirmation {
+    pub fn new(
+        outcome: TransactionConfirmationOutcome,
+        transaction: &Transaction,
+    ) -> NewTransactionConfirmation {
+        NewTransactionConfirmation {
+            outcome,
+            transaction_id: transaction.id,
+        }
+    }
 }
