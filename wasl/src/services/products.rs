@@ -1,7 +1,7 @@
 use crate::data::connection::*;
 use crate::data::models::{
     KeyType, NewProduct, NewProductOrder, Product, ProductOrder, Transaction,
-    User,
+    TransactionConfirmation, TransactionConfirmationOutcome, User,
 };
 use crate::result::{Result, UserError};
 use crate::services::{FinanceService, UsersService};
@@ -92,5 +92,36 @@ impl ProductsService {
                     transaction,
                 ))
             })?)
+    }
+
+    pub fn confirm_order(
+        &self,
+        order: &ProductOrder,
+    ) -> Result<TransactionConfirmation> {
+        self.finalize_order(order, TransactionConfirmationOutcome::Confirmed)
+    }
+
+    pub fn decline_reservation(
+        &self,
+        order: &ProductOrder,
+    ) -> Result<TransactionConfirmation> {
+        self.finalize_order(order, TransactionConfirmationOutcome::Declined)
+    }
+
+    #[inline]
+    fn finalize_order(
+        &self,
+        order: &ProductOrder,
+        outcome: TransactionConfirmationOutcome,
+    ) -> Result<TransactionConfirmation> {
+        use crate::data::schema::transactions::dsl::*;
+
+        let transaction = transactions
+            .find(order.transaction_id)
+            .get_result(&self.conn.get()?)?;
+
+        self.finance_svc
+            .transactions_service()
+            .confirm(&transaction, outcome)
     }
 }
