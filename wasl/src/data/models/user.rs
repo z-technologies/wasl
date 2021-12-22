@@ -36,7 +36,7 @@ pub struct User {
     pub profile_photo: Option<String>,
 
     pub cached_balance: f64,
-    pub created_at: chrono::NaiveDateTime,
+    pub created_at: chrono::DateTime<chrono::Utc>,
 }
 
 #[derive(Debug, Insertable, Serialize, Deserialize, Validate)]

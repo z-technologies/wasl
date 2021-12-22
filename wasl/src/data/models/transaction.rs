@@ -9,7 +9,7 @@ pub struct Transaction {
     pub amount: BigDecimal,
     pub sender: KeyType,
     pub receiver: KeyType,
-    pub made_at: chrono::NaiveDateTime,
+    pub made_at: chrono::DateTime<chrono::Utc>,
 }
 
 #[derive(Debug, Insertable)]
@@ -36,7 +36,7 @@ pub struct TransactionConfirmation {
     pub id: KeyType,
     pub outcome: TransactionConfirmationOutcome,
     pub transaction_id: KeyType,
-    pub confirmed_at: chrono::NaiveDateTime,
+    pub confirmed_at: chrono::DateTime<chrono::Utc>,
 }
 
 #[derive(Clone, Debug, DbEnum)]

@@ -53,9 +53,8 @@ pub struct NewService {
 pub struct ServiceReservation {
     #[serde(skip)]
     pub id: KeyType,
-    pub reservation_begin: chrono::NaiveDateTime,
-    pub reservation_end: chrono::NaiveDateTime,
-    pub made_by: KeyType,
+    pub reservation_begin: chrono::DateTime<chrono::Utc>,
+    pub reservation_end: chrono::DateTime<chrono::Utc>,
     pub service_id: KeyType,
     pub transaction_id: KeyType,
 }
@@ -63,25 +62,22 @@ pub struct ServiceReservation {
 #[derive(Debug, Insertable)]
 #[table_name = "service_reservations"]
 pub struct NewServiceReservation {
-    pub reservation_begin: chrono::NaiveDateTime,
-    pub reservation_end: chrono::NaiveDateTime,
-    pub made_by: KeyType,
+    pub reservation_begin: chrono::DateTime<chrono::Utc>,
+    pub reservation_end: chrono::DateTime<chrono::Utc>,
     pub service_id: KeyType,
     pub transaction_id: KeyType,
 }
 
 impl NewServiceReservation {
     pub fn new(
-        begin: chrono::NaiveDateTime,
-        end: chrono::NaiveDateTime,
-        by: &User,
+        begin: chrono::DateTime<chrono::Utc>,
+        end: chrono::DateTime<chrono::Utc>,
         service: &Service,
         transaction: &Transaction,
     ) -> NewServiceReservation {
         NewServiceReservation {
             reservation_begin: begin,
             reservation_end: end,
-            made_by: by.id,
             service_id: service.id,
             transaction_id: transaction.id,
         }

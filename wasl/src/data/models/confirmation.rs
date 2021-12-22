@@ -23,8 +23,8 @@ pub struct Confirmation {
     pub otp: String,
     pub token: String,
     pub user_id: KeyType,
-    pub issued_at: chrono::NaiveDateTime,
-    pub expires_at: chrono::NaiveDateTime,
+    pub issued_at: chrono::DateTime<chrono::Utc>,
+    pub expires_at: chrono::DateTime<chrono::Utc>,
 }
 
 #[derive(Debug, Insertable, Serialize, Deserialize, Validate)]
@@ -33,6 +33,6 @@ pub struct NewConfirmation {
     pub otp: String,
     pub token: String,
     pub user_id: KeyType,
-    pub issued_at: chrono::NaiveDateTime,
-    pub expires_at: chrono::NaiveDateTime,
+    pub issued_at: chrono::DateTime<chrono::Utc>,
+    pub expires_at: chrono::DateTime<chrono::Utc>,
 }
