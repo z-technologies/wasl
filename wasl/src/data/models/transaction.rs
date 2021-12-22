@@ -7,6 +7,7 @@ use bigdecimal::BigDecimal;
 pub struct Transaction {
     pub id: KeyType,
     pub amount: BigDecimal,
+    pub confirmation_token: String,
     pub sender: KeyType,
     pub receiver: KeyType,
     pub made_at: chrono::DateTime<chrono::Utc>,
@@ -16,6 +17,7 @@ pub struct Transaction {
 #[table_name = "transactions"]
 pub struct NewTransaction {
     pub amount: BigDecimal,
+    pub confirmation_token: String,
     pub sender: KeyType,
     pub receiver: KeyType,
 }
