@@ -64,8 +64,8 @@ impl ServicesService {
     pub fn is_available(
         &self,
         service: &Service,
-        begin: &chrono::NaiveDateTime,
-        end: &chrono::NaiveDateTime,
+        begin: &chrono::DateTime<chrono::Utc>,
+        end: &chrono::DateTime<chrono::Utc>,
     ) -> Result<bool> {
         let reservations = self.reservations(service)?;
 
@@ -81,8 +81,8 @@ impl ServicesService {
         &self,
         service: &Service,
         customer: &User,
-        begin: chrono::NaiveDateTime,
-        end: chrono::NaiveDateTime,
+        begin: chrono::DateTime<chrono::Utc>,
+        end: chrono::DateTime<chrono::Utc>,
     ) -> Result<(ServiceReservation, Transaction)> {
         use crate::data::schema::service_reservations::dsl::*;
 
@@ -95,9 +95,7 @@ impl ServicesService {
                     return Err(UserError::TimePeriodsOverlap);
                 }
 
-                let new_reservation =
-                    NewServiceReservation::new(customer, service, begin, end);
-                let transaction = self.finance_svc.transfer_pending(
+                let transaction = self.finance_svc.transfer(
                     customer,
                     &self.users_svc.get_by_id(service.id)?,
                     service.price.clone(),
@@ -105,7 +103,12 @@ impl ServicesService {
 
                 Ok((
                     diesel::insert_into(service_reservations)
-                        .values(&new_reservation)
+                        .values(&NewServiceReservation::new(
+                            begin,
+                            end,
+                            service,
+                            &transaction,
+                        ))
                         .get_result(&self.conn.get()?)?,
                     transaction,
                 ))
@@ -115,8 +118,14 @@ impl ServicesService {
 
 #[inline]
 fn periods_overlap(
-    lhs: (&chrono::NaiveDateTime, &chrono::NaiveDateTime),
-    rhs: (&chrono::NaiveDateTime, &chrono::NaiveDateTime),
+    lhs: (
+        &chrono::DateTime<chrono::Utc>,
+        &chrono::DateTime<chrono::Utc>,
+    ),
+    rhs: (
+        &chrono::DateTime<chrono::Utc>,
+        &chrono::DateTime<chrono::Utc>,
+    ),
 ) -> bool {
     lhs.0 < rhs.1 && rhs.0 < lhs.1
 }
