@@ -4,9 +4,9 @@ table! {
 
     confirmations (id) {
         id -> Int4,
-        user_id -> Int4,
         otp -> Varchar,
         token -> Varchar,
+        user_id -> Int4,
         issued_at -> Timestamptz,
         expires_at -> Timestamptz,
     }
@@ -53,8 +53,8 @@ table! {
 
     product_orders (id) {
         id -> Int4,
-        made_by -> Int4,
         product_id -> Int4,
+        transaction_id -> Int4,
     }
 }
 
@@ -78,10 +78,10 @@ table! {
 
     service_reservations (id) {
         id -> Int4,
-        made_by -> Int4,
-        service_id -> Int4,
         reservation_begin -> Timestamptz,
         reservation_end -> Timestamptz,
+        service_id -> Int4,
+        transaction_id -> Int4,
     }
 }
 
@@ -159,10 +159,10 @@ joinable!(financial_record_verifications -> financial_records (financial_record_
 joinable!(financial_record_verifications -> users (verified_by));
 joinable!(financial_records -> users (made_by));
 joinable!(product_orders -> products (product_id));
-joinable!(product_orders -> users (made_by));
+joinable!(product_orders -> transactions (transaction_id));
 joinable!(products -> users (user_id));
 joinable!(service_reservations -> services (service_id));
-joinable!(service_reservations -> users (made_by));
+joinable!(service_reservations -> transactions (transaction_id));
 joinable!(services -> users (user_id));
 joinable!(transaction_confirmations -> transactions (transaction_id));
 joinable!(user_groups -> groups (group_id));
