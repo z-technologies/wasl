@@ -91,7 +91,7 @@ pub enum UserError {
     OutOfStock,
 
     #[display(fmt = "transaction already confirmed")]
-    TransactionAlreadyConfimed,
+    TransactionAlreadyConfirmed,
 }
 
 impl std::error::Error for InternalError {}

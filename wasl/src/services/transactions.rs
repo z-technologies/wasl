@@ -121,7 +121,7 @@ impl TransactionsService {
         ))
         .get_result(&self.conn.get()?)?
         {
-            return Err(UserError::TransactionAlreadyConfimed);
+            return Err(UserError::TransactionAlreadyConfirmed);
         }
 
         Ok(diesel::insert_into(transaction_confirmations)
