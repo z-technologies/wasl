@@ -1,8 +1,9 @@
 use crate::data::connection::*;
 use crate::data::models::{
-    NewTransaction, Transaction, TransactionConfirmationOutcome, User,
+    NewTransaction, NewTransactionConfirmation, Transaction,
+    TransactionConfirmation, TransactionConfirmationOutcome, User,
 };
-use crate::result::Result;
+use crate::result::{Result, UserError};
 
 use bigdecimal::BigDecimal;
 use diesel::prelude::*;
@@ -104,6 +105,30 @@ impl TransactionsService {
 
         Ok(diesel::insert_into(transactions)
             .values(new_transaction)
+            .get_result(&self.conn.get()?)?)
+    }
+
+    pub fn confirm(
+        &self,
+        transaction: &Transaction,
+        confirmation_outcome: TransactionConfirmationOutcome,
+    ) -> Result<TransactionConfirmation> {
+        use crate::data::schema::transaction_confirmations::dsl::*;
+        use diesel::dsl::*;
+
+        if select(exists(
+            transaction_confirmations.filter(transaction_id.eq(transaction.id)),
+        ))
+        .get_result(&self.conn.get()?)?
+        {
+            return Err(UserError::TransactionAlreadyConfimed);
+        }
+
+        Ok(diesel::insert_into(transaction_confirmations)
+            .values(&NewTransactionConfirmation::new(
+                confirmation_outcome,
+                transaction,
+            ))
             .get_result(&self.conn.get()?)?)
     }
 }
