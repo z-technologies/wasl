@@ -79,8 +79,7 @@ impl ProductsService {
                     return Err(UserError::OutOfStock);
                 }
 
-                let new_product_order = NewProductOrder::new(customer, product);
-                let transaction = self.finance_svc.transfer_pending(
+                let transaction = self.finance_svc.transfer(
                     customer,
                     &self.users_svc.get_by_id(product.user_id)?,
                     product.price.clone(),
@@ -88,7 +87,7 @@ impl ProductsService {
 
                 Ok((
                     diesel::insert_into(product_orders)
-                        .values(&new_product_order)
+                        .values(&NewProductOrder::new(product, &transaction))
                         .get_result(&self.conn.get()?)?,
                     transaction,
                 ))
