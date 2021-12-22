@@ -34,6 +34,9 @@ impl FinancialRecordsService {
             .load(&self.conn.get()?)?)
     }
 
+    /// TODO:
+    /// Reimplement this to guarantee that the user cannot spend
+    /// money that he/she requested to withdraw
     pub fn total_verified(&self, user: &User) -> Result<BigDecimal> {
         use crate::data::schema::financial_record_verifications::dsl::*;
         use crate::data::schema::financial_records::dsl::*;
