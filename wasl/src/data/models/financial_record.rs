@@ -19,8 +19,8 @@ pub struct FinancialRecordVerification {
     pub id: KeyType,
     pub outcome: FinancialRecordVerificationOutcome,
     pub financial_record_id: KeyType,
+    pub verified_at: chrono::NaiveDateTime,
     pub verified_by: KeyType,
-    pub verified_at: chrono::DateTime<chrono::Utc>,
 }
 
 #[derive(Clone, Debug, DbEnum)]
