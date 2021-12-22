@@ -97,8 +97,8 @@ pub struct AddSerivceFrom {
 
 #[derive(Deserialize)]
 pub struct DateTimePeriod {
-    pub begin: chrono::NaiveDateTime,
-    pub end: chrono::NaiveDateTime,
+    pub begin: chrono::DateTime<chrono::Utc>,
+    pub end: chrono::DateTime<chrono::Utc>,
 }
 
 impl AddSerivceFrom {
