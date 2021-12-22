@@ -17,9 +17,7 @@ pub async fn get(
     id: web::Path<KeyType>,
     services_svc: web::Data<ServicesService>,
 ) -> Result<HttpResponse> {
-    let service =
-        web::block(move || services_svc.get_ref().get_service_by_id(id.0))
-            .await?;
+    let service = web::block(move || services_svc.get_ref().get(id.0)).await?;
 
     Ok(HttpResponse::Ok().json(service))
 }
@@ -56,7 +54,7 @@ pub async fn delete(
     let user = auth.user(users_svc.get_ref().clone()).await?;
 
     web::block(move || {
-        let service = services_svc.get_ref().get_service_by_id(id.0)?;
+        let service = services_svc.get_ref().get(id.0)?;
         services_svc.get_ref().delete(service, &user)
     })
     .await?;
@@ -77,7 +75,7 @@ pub async fn reserve(
     let user = auth.user(users_svc.get_ref().clone()).await?;
 
     let reservation = web::block(move || {
-        let service = services_svc.get_ref().get_service_by_id(id.0)?;
+        let service = services_svc.get_ref().get(id.0)?;
         services_svc.make_reservation(&service, &user, period.begin, period.end)
     })
     .await?

@@ -29,7 +29,7 @@ impl ServicesService {
         }
     }
 
-    pub fn get_service_by_id(&self, key: KeyType) -> Result<Service> {
+    pub fn get(&self, key: KeyType) -> Result<Service> {
         use crate::data::schema::services::dsl::*;
 
         Ok(services.find(key).get_result(&self.conn.get()?)?)
