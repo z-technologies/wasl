@@ -64,4 +64,12 @@ impl FinanceService {
                     .create(&NewTransaction::new(from, to, amount))?)
             })?)
     }
+
+    pub fn financial_records_service(&self) -> &Arc<FinancialRecordsService> {
+        &self.financial_records_svc
+    }
+
+    pub fn transactions_service(&self) -> &Arc<TransactionsService> {
+        &self.transactions_svc
+    }
 }
