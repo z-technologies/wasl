@@ -66,7 +66,10 @@ impl ResponseError for ApiError {
                 }
                 UserError::UsernameAlreadyInUse
                 | UserError::EmailAlreadyInUse
-                | UserError::TimePeriodsOverlap => StatusCode::CONFLICT,
+                | UserError::TimePeriodsOverlap
+                | UserError::TransactionAlreadyConfirmed => {
+                    StatusCode::CONFLICT
+                }
             },
         }
     }
