@@ -1,5 +1,5 @@
 use crate::data::models::{KeyType, User};
-use crate::data::schema::transactions;
+use crate::data::schema::{transaction_confirmations, transactions};
 
 use bigdecimal::BigDecimal;
 
@@ -21,15 +21,27 @@ pub struct NewTransaction {
 }
 
 impl NewTransaction {
-    pub fn new_pending(
-        from: &User,
-        to: &User,
-        amount: BigDecimal,
-    ) -> NewTransaction {
+    pub fn new(from: &User, to: &User, amount: BigDecimal) -> NewTransaction {
         NewTransaction {
             amount,
             sender: from.id,
             receiver: to.id,
         }
     }
+}
+
+#[derive(Associations, Clone, Debug, Identifiable, Queryable)]
+#[belongs_to(Transaction)]
+pub struct TransactionConfirmation {
+    pub id: KeyType,
+    pub outcome: TransactionConfirmationOutcome,
+    pub transaction_id: KeyType,
+    pub confirmed_at: chrono::NaiveDateTime,
+}
+
+#[derive(Clone, Debug, DbEnum)]
+#[DieselType = "Transaction_confirmation_outcome"]
+pub enum TransactionConfirmationOutcome {
+    Declined,
+    Confirmed,
 }
