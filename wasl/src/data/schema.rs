@@ -119,6 +119,7 @@ table! {
     transactions (id) {
         id -> Int4,
         amount -> Numeric,
+        confirmation_token -> Varchar,
         sender -> Int4,
         receiver -> Int4,
         made_at -> Timestamptz,
