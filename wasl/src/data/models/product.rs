@@ -1,4 +1,4 @@
-use crate::data::models::{KeyType, User};
+use crate::data::models::{KeyType, Transaction, User};
 use crate::data::schema::{product_orders, products};
 
 use bigdecimal::BigDecimal;
@@ -50,22 +50,25 @@ pub struct NewProduct {
 pub struct ProductOrder {
     #[serde(skip)]
     pub id: KeyType,
-    pub made_by: KeyType,
     pub product_id: KeyType,
+    pub transaction_id: KeyType,
 }
 
 #[derive(Debug, Insertable)]
 #[table_name = "product_orders"]
 pub struct NewProductOrder {
-    pub made_by: KeyType,
     pub product_id: KeyType,
+    pub transaction_id: KeyType,
 }
 
 impl NewProductOrder {
-    pub fn new(by: &User, product: &Product) -> NewProductOrder {
+    pub fn new(
+        product: &Product,
+        transaction: &Transaction,
+    ) -> NewProductOrder {
         NewProductOrder {
-            made_by: by.id,
             product_id: product.id,
+            transaction_id: transaction.id,
         }
     }
 }
