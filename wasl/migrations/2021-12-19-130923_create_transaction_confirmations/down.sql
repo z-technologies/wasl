@@ -1,0 +1,2 @@
+DROP TABLE transaction_confirmations;
+DROP TYPE transaction_confirmation_outcome;
