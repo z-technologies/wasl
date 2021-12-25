@@ -84,6 +84,7 @@ impl ServicesService {
         customer: &User,
         begin: chrono::DateTime<chrono::Utc>,
         end: chrono::DateTime<chrono::Utc>,
+        private_key: &[u8],
     ) -> Result<(ServiceReservation, Transaction)> {
         use crate::data::schema::service_reservations::dsl::*;
 
@@ -100,6 +101,7 @@ impl ServicesService {
                     customer,
                     &self.users_svc.get_by_id(service.id)?,
                     service.price.clone(),
+                    private_key,
                 )?;
 
                 Ok((
@@ -119,20 +121,24 @@ impl ServicesService {
     pub fn confirm_reservation(
         &self,
         reservation: &ServiceReservation,
+        public_key: &[u8],
     ) -> Result<TransactionConfirmation> {
         self.finalize_reservation(
             reservation,
             TransactionConfirmationOutcome::Confirmed,
+            public_key,
         )
     }
 
     pub fn decline_reservation(
         &self,
         reservation: &ServiceReservation,
+        public_key: &[u8],
     ) -> Result<TransactionConfirmation> {
         self.finalize_reservation(
             reservation,
             TransactionConfirmationOutcome::Declined,
+            public_key,
         )
     }
 
@@ -141,6 +147,7 @@ impl ServicesService {
         &self,
         reservation: &ServiceReservation,
         outcome: TransactionConfirmationOutcome,
+        public_key: &[u8],
     ) -> Result<TransactionConfirmation> {
         use crate::data::schema::transactions::dsl::*;
 
@@ -148,9 +155,11 @@ impl ServicesService {
             .find(reservation.transaction_id)
             .get_result(&self.conn.get()?)?;
 
-        self.finance_svc
-            .transactions_service()
-            .confirm(&transaction, outcome)
+        self.finance_svc.transactions_service().confirm(
+            &transaction,
+            outcome,
+            public_key,
+        )
     }
 }
 
