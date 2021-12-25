@@ -48,6 +48,7 @@ impl FinanceService {
         from: &User,
         to: &User,
         amount: BigDecimal,
+        private_key: &[u8],
     ) -> Result<Transaction> {
         Ok(self
             .conn
@@ -58,10 +59,9 @@ impl FinanceService {
                     return Err(UserError::InsufficientBalance);
                 }
 
-                Ok(self
-                    .transactions_svc
-                    .as_ref()
-                    .create(&NewTransaction::new(from, to, amount))?)
+                Ok(self.transactions_svc.as_ref().create(
+                    &NewTransaction::new(from, to, amount, private_key)?,
+                )?)
             })?)
     }
 
