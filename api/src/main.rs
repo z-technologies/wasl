@@ -4,6 +4,7 @@ extern crate config;
 extern crate derive_more;
 extern crate env_logger;
 extern crate jsonwebtoken;
+extern crate pem;
 extern crate serde;
 extern crate validator;
 
