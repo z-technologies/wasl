@@ -67,6 +67,7 @@ impl ProductsService {
         &self,
         product: &mut Product,
         customer: &User,
+        private_key: &[u8],
     ) -> Result<(ProductOrder, Transaction)> {
         use crate::data::schema::product_orders::dsl::*;
 
@@ -83,6 +84,7 @@ impl ProductsService {
                     customer,
                     &self.users_svc.get_by_id(product.user_id)?,
                     product.price.clone(),
+                    private_key,
                 )?;
 
                 Ok((
@@ -97,15 +99,25 @@ impl ProductsService {
     pub fn confirm_order(
         &self,
         order: &ProductOrder,
+        public_key: &[u8],
     ) -> Result<TransactionConfirmation> {
-        self.finalize_order(order, TransactionConfirmationOutcome::Confirmed)
+        self.finalize_order(
+            order,
+            TransactionConfirmationOutcome::Confirmed,
+            public_key,
+        )
     }
 
     pub fn decline_reservation(
         &self,
         order: &ProductOrder,
+        public_key: &[u8],
     ) -> Result<TransactionConfirmation> {
-        self.finalize_order(order, TransactionConfirmationOutcome::Declined)
+        self.finalize_order(
+            order,
+            TransactionConfirmationOutcome::Declined,
+            public_key,
+        )
     }
 
     #[inline]
@@ -113,6 +125,7 @@ impl ProductsService {
         &self,
         order: &ProductOrder,
         outcome: TransactionConfirmationOutcome,
+        public_key: &[u8],
     ) -> Result<TransactionConfirmation> {
         use crate::data::schema::transactions::dsl::*;
 
@@ -120,8 +133,10 @@ impl ProductsService {
             .find(order.transaction_id)
             .get_result(&self.conn.get()?)?;
 
-        self.finance_svc
-            .transactions_service()
-            .confirm(&transaction, outcome)
+        self.finance_svc.transactions_service().confirm(
+            &transaction,
+            outcome,
+            public_key,
+        )
     }
 }
