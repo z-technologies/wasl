@@ -56,6 +56,9 @@ pub enum InternalError {
 
     #[display(fmt = "signature error: {}", _0)]
     SignatureError(p256::ecdsa::signature::Error),
+
+    #[display(fmt = "pem error: {}", _0)]
+    PemError(pem::PemError),
 }
 
 #[derive(Debug, Display, From)]
@@ -163,6 +166,12 @@ impl From<native_tls::Error> for UserError {
 impl From<p256::ecdsa::signature::Error> for UserError {
     fn from(err: p256::ecdsa::signature::Error) -> Self {
         UserError::InternalError(InternalError::SignatureError(err))
+    }
+}
+
+impl From<pem::PemError> for UserError {
+    fn from(err: pem::PemError) -> Self {
+        UserError::InternalError(InternalError::PemError(err))
     }
 }
 
