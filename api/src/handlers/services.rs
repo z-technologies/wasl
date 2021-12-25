@@ -1,6 +1,7 @@
 use crate::auth::groups::AuthGroup;
 use crate::auth::identity::Identity;
 use crate::result::Result;
+use crate::settings::Settings;
 
 use wasl::data::models::{KeyType, NewService, User};
 use wasl::services::ServicesService;
@@ -69,14 +70,23 @@ pub async fn reserve(
     users_svc: web::Data<Arc<UsersService>>,
     services_svc: web::Data<Arc<ServicesService>>,
     period: web::Json<DateTimePeriod>,
+    settings: web::Data<Arc<Settings>>,
 ) -> Result<HttpResponse> {
     auth.has(AuthGroup::Customer)?;
 
     let user = auth.user(users_svc.get_ref().clone()).await?;
+    let private_key = settings.security.private_key()?;
 
     let reservation = web::block(move || {
         let service = services_svc.get_ref().get(id.0)?;
-        services_svc.make_reservation(&service, &user, period.begin, period.end)
+
+        services_svc.make_reservation(
+            &service,
+            &user,
+            period.begin,
+            period.end,
+            &private_key,
+        )
     })
     .await?
     .0;
