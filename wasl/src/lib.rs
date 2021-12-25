@@ -9,6 +9,7 @@ extern crate lettre;
 extern crate native_tls;
 #[macro_use]
 extern crate lazy_static;
+extern crate pem;
 extern crate rand;
 extern crate regex;
 extern crate serde;
