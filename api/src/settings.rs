@@ -51,11 +51,11 @@ pub struct SecuritySettings {
 }
 
 impl SecuritySettings {
-    pub fn public_key(&self) -> Result<Vec<u8>> {
+    pub fn public_key_pem(&self) -> Result<Vec<u8>> {
         Ok(io::load_file_bytes(&self.public_key_path)?)
     }
 
-    pub fn private_key(&self) -> Result<Vec<u8>> {
+    pub fn private_key_pem(&self) -> Result<Vec<u8>> {
         Ok(io::load_file_bytes(&self.private_key_path)?)
     }
 }

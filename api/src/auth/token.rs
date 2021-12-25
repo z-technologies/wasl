@@ -44,10 +44,10 @@ impl Claims {
         )?)
     }
 
-    pub fn decode(token: &str, pk: &Vec<u8>) -> Result<Claims> {
+    pub fn decode(token: &str, pem_pk: &Vec<u8>) -> Result<Claims> {
         Ok(jsonwebtoken::decode::<Claims>(
             token,
-            &DecodingKey::from_ec_pem(&pk)?,
+            &DecodingKey::from_ec_pem(&pem_pk)?,
             &Validation::default(),
         )?
         .claims)

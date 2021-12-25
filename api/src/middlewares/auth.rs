@@ -43,8 +43,10 @@ where
         if let Some(auth_header_value) = req.headers().get(AUTHORIZATION_HEADER)
         {
             if let Ok(auth_header) = auth_header_value.to_str() {
-                if let Ok(pk) = self.settings.security.private_key() {
-                    if let Ok(claims) = Claims::from_bearer(auth_header, &pk) {
+                if let Ok(pem_pk) = self.settings.security.private_key_pem() {
+                    if let Ok(claims) =
+                        Claims::from_bearer(auth_header, &pem_pk)
+                    {
                         req.extensions_mut().insert::<Claims>(claims);
                     }
                 }
