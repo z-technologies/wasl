@@ -69,12 +69,12 @@ impl NewTransaction {
         to: &User,
         amount: BigDecimal,
         key: &[u8],
-    ) -> Result<NewTransaction> {
+    ) -> Result<Self> {
         let rand_str = generate_alphanum_string::<32>();
         let signature =
             ECDSASignature::new(key)?.sign_base64(&rand_str.as_bytes());
 
-        Ok(NewTransaction {
+        Ok(Self {
             amount,
             confirmation_token: format!("{}.{}", rand_str, signature),
             sender: from.id,
@@ -88,10 +88,10 @@ impl NewTransactionConfirmation {
         outcome: TransactionConfirmationOutcome,
         transaction: &Transaction,
         key: &[u8],
-    ) -> Result<NewTransactionConfirmation> {
+    ) -> Result<Self> {
         transaction.verify(key)?;
 
-        Ok(NewTransactionConfirmation {
+        Ok(Self {
             outcome,
             transaction_id: transaction.id,
         })
