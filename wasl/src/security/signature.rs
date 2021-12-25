@@ -20,7 +20,18 @@ impl ECDSASignature {
         self.key.sign(msg)
     }
 
-    pub fn verify(&self, msg: &[u8], signature: &Signature) -> Result<()> {
-        Ok(self.key.verifying_key().verify(msg, signature)?)
+    pub fn sign_base64(&self, msg: &[u8]) -> String {
+        use p256::ecdsa::signature::Signature;
+
+        base64::encode(self.sign(msg).as_bytes())
+    }
+
+    pub fn verify(&self, msg: &[u8], signature: &[u8]) -> Result<()> {
+        let signature =
+            <Signature as p256::ecdsa::signature::Signature>::from_bytes(
+                signature,
+            )?;
+
+        Ok(self.key.verifying_key().verify(msg, &signature)?)
     }
 }
