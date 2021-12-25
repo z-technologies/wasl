@@ -1,6 +1,7 @@
 use crate::result::Result;
 
 use wasl::io;
+use wasl::security::key::get_pem_contents;
 use wasl::services::email::EmailSettings;
 
 use config::{Config, ConfigError, Environment, File};
@@ -57,6 +58,14 @@ impl SecuritySettings {
 
     pub fn private_key_pem(&self) -> Result<Vec<u8>> {
         Ok(io::load_file_bytes(&self.private_key_path)?)
+    }
+
+    pub fn public_key(&self) -> Result<Vec<u8>> {
+        Ok(get_pem_contents(&self.public_key_pem()?)?)
+    }
+
+    pub fn private_key(&self) -> Result<Vec<u8>> {
+        Ok(get_pem_contents(&self.private_key_pem()?)?)
     }
 }
 
