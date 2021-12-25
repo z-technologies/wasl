@@ -108,10 +108,14 @@ impl TransactionsService {
             .get_result(&self.conn.get()?)?)
     }
 
+    // TODO:
+    // Require confirmation token
+
     pub fn confirm(
         &self,
         transaction: &Transaction,
         confirmation_outcome: TransactionConfirmationOutcome,
+        public_key: &[u8],
     ) -> Result<TransactionConfirmation> {
         use crate::data::schema::transaction_confirmations::dsl::*;
         use diesel::dsl::*;
@@ -128,7 +132,8 @@ impl TransactionsService {
             .values(&NewTransactionConfirmation::new(
                 confirmation_outcome,
                 transaction,
-            ))
+                public_key,
+            )?)
             .get_result(&self.conn.get()?)?)
     }
 }
