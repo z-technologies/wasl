@@ -62,11 +62,8 @@ pub struct NewProductOrder {
 }
 
 impl NewProductOrder {
-    pub fn new(
-        product: &Product,
-        transaction: &Transaction,
-    ) -> NewProductOrder {
-        NewProductOrder {
+    pub fn new(product: &Product, transaction: &Transaction) -> Self {
+        Self {
             product_id: product.id,
             transaction_id: transaction.id,
         }

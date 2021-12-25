@@ -74,8 +74,8 @@ impl NewServiceReservation {
         end: chrono::DateTime<chrono::Utc>,
         service: &Service,
         transaction: &Transaction,
-    ) -> NewServiceReservation {
-        NewServiceReservation {
+    ) -> Self {
+        Self {
             reservation_begin: begin,
             reservation_end: end,
             service_id: service.id,
