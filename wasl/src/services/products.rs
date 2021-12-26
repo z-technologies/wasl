@@ -72,7 +72,7 @@ impl ProductsService {
         count: i64,
         customer: &User,
         private_key: &[u8],
-    ) -> Result<(ProductOrder, Transaction)> {
+    ) -> Result<ProductOrder> {
         use crate::data::schema::product_orders::dsl::*;
 
         Ok(self
@@ -91,16 +91,9 @@ impl ProductsService {
                     private_key,
                 )?;
 
-                Ok((
-                    diesel::insert_into(product_orders)
-                        .values(&NewProductOrder::new(
-                            product,
-                            count,
-                            &transaction,
-                        ))
-                        .get_result(&self.conn.get()?)?,
-                    transaction,
-                ))
+                Ok(diesel::insert_into(product_orders)
+                    .values(&NewProductOrder::new(product, count, &transaction))
+                    .get_result(&self.conn.get()?)?)
             })?)
     }
 
