@@ -53,8 +53,11 @@ table! {
 
     product_orders (id) {
         id -> Int4,
+        state -> Product_order_state,
+        quantity -> Int8,
         product_id -> Int4,
         transaction_id -> Int4,
+        made_at -> Timestamptz,
     }
 }
 
