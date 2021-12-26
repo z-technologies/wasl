@@ -88,8 +88,7 @@ pub async fn reserve(
             &private_key,
         )
     })
-    .await?
-    .0;
+    .await?;
 
     Ok(HttpResponse::Ok().json(reservation))
 }

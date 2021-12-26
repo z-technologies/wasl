@@ -85,7 +85,7 @@ impl ServicesService {
         begin: chrono::DateTime<chrono::Utc>,
         end: chrono::DateTime<chrono::Utc>,
         private_key: &[u8],
-    ) -> Result<(ServiceReservation, Transaction)> {
+    ) -> Result<ServiceReservation> {
         use crate::data::schema::service_reservations::dsl::*;
 
         Ok(self
@@ -104,17 +104,14 @@ impl ServicesService {
                     private_key,
                 )?;
 
-                Ok((
-                    diesel::insert_into(service_reservations)
-                        .values(&NewServiceReservation::new(
-                            begin,
-                            end,
-                            service,
-                            &transaction,
-                        ))
-                        .get_result(&self.conn.get()?)?,
-                    transaction,
-                ))
+                Ok(diesel::insert_into(service_reservations)
+                    .values(&NewServiceReservation::new(
+                        begin,
+                        end,
+                        service,
+                        &transaction,
+                    ))
+                    .get_result(&self.conn.get()?)?)
             })?)
     }
 
