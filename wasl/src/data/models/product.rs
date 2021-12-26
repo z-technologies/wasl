@@ -50,20 +50,39 @@ pub struct NewProduct {
 pub struct ProductOrder {
     #[serde(skip)]
     pub id: KeyType,
+    pub state: ProductOrderState,
+    pub quantity: i64,
     pub product_id: KeyType,
     pub transaction_id: KeyType,
+    pub made_at: chrono::DateTime<chrono::Utc>,
 }
 
 #[derive(Debug, Insertable)]
 #[table_name = "product_orders"]
 pub struct NewProductOrder {
+    pub state: ProductOrderState,
+    pub quantity: i64,
     pub product_id: KeyType,
     pub transaction_id: KeyType,
 }
 
+#[derive(Clone, Debug, DbEnum, Serialize, Deserialize)]
+#[DieselType = "Product_order_state"]
+pub enum ProductOrderState {
+    Pending,
+    Declined,
+    Accepted,
+}
+
 impl NewProductOrder {
-    pub fn new(product: &Product, transaction: &Transaction) -> Self {
+    pub fn new(
+        product: &Product,
+        quantity: i64,
+        transaction: &Transaction,
+    ) -> Self {
         Self {
+            state: ProductOrderState::Pending,
+            quantity,
             product_id: product.id,
             transaction_id: transaction.id,
         }
