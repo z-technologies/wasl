@@ -1,11 +1,13 @@
 use crate::data::connection::*;
 use crate::data::models::{
-    KeyType, NewProduct, NewProductOrder, Product, ProductOrder, Transaction,
-    TransactionConfirmation, TransactionConfirmationOutcome, User,
+    KeyType, NewProduct, NewProductOrder, Product, ProductOrder,
+    ProductOrderState, Transaction, TransactionConfirmation,
+    TransactionConfirmationOutcome, User,
 };
 use crate::result::{Result, UserError};
 use crate::services::{FinanceService, UsersService};
 
+use bigdecimal::BigDecimal;
 use diesel::prelude::*;
 
 use std::sync::Arc;
@@ -51,21 +53,23 @@ impl ProductsService {
         Ok(diesel::delete(&product).execute(&self.conn.get()?)?)
     }
 
-    pub fn is_available(&self, product: &Product) -> Result<bool> {
-        use diesel::dsl::*;
+    pub fn is_available(&self, product: &Product, count: i64) -> Result<bool> {
+        use crate::data::schema::product_orders::dsl::*;
 
-        // TODO: get only accepted orders
+        let total_ordered: i64 = ProductOrder::belonging_to(product)
+            .filter(state.eq(ProductOrderState::Accepted))
+            .select(quantity)
+            .load(&self.conn.get()?)?
+            .iter()
+            .sum::<i64>();
 
-        let orders_count: i64 = ProductOrder::belonging_to(product)
-            .select(count_star())
-            .first(&self.conn.get()?)?;
-
-        Ok(product.available_quantity - orders_count > 0)
+        Ok(product.available_quantity - total_ordered + count > 0)
     }
 
     pub fn purchase(
         &self,
         product: &mut Product,
+        count: i64,
         customer: &User,
         private_key: &[u8],
     ) -> Result<(ProductOrder, Transaction)> {
@@ -76,20 +80,24 @@ impl ProductsService {
             .get()?
             .build_transaction()
             .run::<_, UserError, _>(|| {
-                if !self.is_available(product)? {
+                if !self.is_available(product, count)? {
                     return Err(UserError::OutOfStock);
                 }
 
                 let transaction = self.finance_svc.transfer(
                     customer,
                     &self.users_svc.get_by_id(product.user_id)?,
-                    product.price.clone(),
+                    product.price.clone() * BigDecimal::from(count),
                     private_key,
                 )?;
 
                 Ok((
                     diesel::insert_into(product_orders)
-                        .values(&NewProductOrder::new(product, &transaction))
+                        .values(&NewProductOrder::new(
+                            product,
+                            count,
+                            &transaction,
+                        ))
                         .get_result(&self.conn.get()?)?,
                     transaction,
                 ))
